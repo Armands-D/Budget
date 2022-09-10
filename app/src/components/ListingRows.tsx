@@ -2,23 +2,33 @@
 import exp from 'constants';
 import React, { createElement } from 'react';
 
+function tableSection(name: string, items: {}){
+  const heading = <thead></thead>
+}
+
 function ListingRows(props: any){
-
-  var incomes_td = props.incomes.map( (income : number) =>
-    <td>{income}</td>
-  )
-
-  var expenses_td = props.expenses.map( (expense : number) => 
-    <td>{expense}</td>
-  )
-  
-  var listing_rows = []
-  for(var i = 0; i < props.max_rows; i++){
-    var row = <tr key={i}>{expenses_td.at(i)}{incomes_td.at(i)}</tr>
-    listing_rows.push(row)
+  let expenses : any = props.expenses
+  var sections = []
+  for(var ex in expenses){
+    const th = <th>{ex}</th>
+    var rows = []
+    let expense_items : any = expenses[ex]
+    for(var item in expense_items){
+      rows.push(
+        <tr><td>{item}</td><td>{expense_items[item]}</td></tr>
+      )
+    }
+    // the creation of each item in 'sections' can be done by a seperate component 
+    sections.push(
+      <div>
+        <thead><tr>{th}</tr></thead>
+        <tbody>
+          {rows}
+        </tbody>
+      </div>
+    )
   }
-
-  return <tbody id='listings'>{listing_rows}</tbody>
+  return <div>{sections}</div>
 }
 
 export {ListingRows}

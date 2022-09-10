@@ -1,4 +1,31 @@
 {
-"expenses" : [1, 1],
-"incomes" : [2, 2]
+"expenses" : {
+    "utilities" : {
+      "electricity": 100.20,
+      "internet": 200.23
+    },
+    "transport": {
+      "bus": 5.00,
+      "train": 7.50
+    },
+    "food": {},
+    "housing": {},
+    "insurance": {},
+    "debts": {},
+    "clothing": {
+      "t-shirt": 420.69
+    },
+    "misc": {
+      "new computer": 4200.00
+    }
+  },
+
+  "incomes": {
+    "earners": {
+      "armands": 3000.00
+    },
+    "other": {
+      "nightly services": 1000.00
+    }
+  }
 }
