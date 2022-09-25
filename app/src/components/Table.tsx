@@ -2,6 +2,8 @@
 import React from 'react';
 // Components
 import {ListingRows} from './ListingRows'
+// Data types
+import {Budget} from '../data/budget_data_types'
 
 function Table(){
   const headings =
@@ -12,26 +14,21 @@ function Table(){
       </tr>
     </thead>
 
-  const data = require("../sample.json")
-  const expenses = data.expenses
-  const incomes = data.incomes
-  let max_rows :number = (expenses.length > incomes.length ? expenses.length : incomes.length )
+  const data: Budget = require("../sample.json")
+  //let max_rows :number = (expenses.length > incomes.length ? expenses.length : incomes.length )
   
-  const p = {
-    expenses: expenses,
-    incomes: incomes,
-    max_rows: max_rows,
-  }
 
   // spread, unpacks all properties as a prop
-  const listingRows = <ListingRows {...p}></ListingRows>
+  const listingRows = <ListingRows {...data}></ListingRows>
   
   const table =
-    <table>
-        {headings}
-        {listingRows}
-    </table>
-  
+    <div>
+      <table>
+          {headings}
+      </table>
+      {listingRows}
+    </div>
+    
   return table
 }
 
