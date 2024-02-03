@@ -1,12 +1,12 @@
 import React from 'react';
-import './App.css';
+import './css/App.css';
 // Components
 import {Table} from './components/Table'
 
 function App() {
   return (
     <div className="App">
-      <Table></Table>
+      <Table/>
     </div>
   );
 }

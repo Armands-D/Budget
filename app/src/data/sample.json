@@ -1,0 +1,25 @@
+[
+  {
+    "income": {
+      "Salary": {
+        "salary": {
+          "amount": 100
+        }
+      }
+    }
+  },
+  {
+    "expenses": {
+      "House": {
+        "rent": {
+          "amount": 50
+        }
+      },
+      "Food": {
+        "groceries": {
+          "amount": 20
+        }
+      }
+    }
+  }
+]
