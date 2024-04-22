@@ -18,15 +18,29 @@ app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
 
-app.get('/user', (req: Request, res: Response) => {
-  let connection = mysql.createConnection({
+app.get('/user/:userId/budget/:budgetId', (req: Request, res: Response) => {
+  let connection: mysql.Connection = mysql.createConnection({
     host      : DB_HOST,
     port      : DB_PORT,
     user      : DB_USERNAME,
     password  : DB_PASSWORD
   });
+
+  const userId: number = Number(req.params.userId)
+  const budgetId: number = Number(req.params.budgetId)
+
+  if (Number.isNaN(userId) || Number.isNaN(budgetId)){
+    let param_error : ApiError = {
+      error: 'Client Error',
+      status: 400,
+      message: 'Invalid userId or budgetId, must be an integer.'
+    }
+    res.send(param_error)
+    return
+  }
   
   connection.connect(function(err: mysql.QueryError | null):void{
+
     if (err) {
       console.error('error connecting: ' + err.stack)
       let connection_error : ApiError = {
@@ -37,8 +51,10 @@ app.get('/user', (req: Request, res: Response) => {
       res.send(connection_error)
       return
     }
+
     connection.query(
-      'CALL main_db.get_users();',
+      `CALL main_db.get_budget(?, ?);`,
+      [userId, budgetId],
       function(
         err: mysql.QueryError | null,
         result: mysql.QueryResult,
@@ -46,9 +62,13 @@ app.get('/user', (req: Request, res: Response) => {
       ){
         if (err) throw err;
         console.log(result)
-        res.send(result)
+        res.send(JSON.parse(JSON.stringify(result))[0])
       }
     )
+
+    connection.end(function(err: mysql.QueryError | null): void {
+      if (err) throw err;
+    })
   });
 })
 
