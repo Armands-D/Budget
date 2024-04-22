@@ -29,16 +29,28 @@ app.get('/user', (req: Request, res: Response) => {
   connection.connect(function(err: mysql.QueryError | null):void{
     if (err) {
       console.error('error connecting: ' + err.stack)
-      let connection_error : ApiError = {error: 'Client error', status: 400, message: 'Failed to Connect to DB'}
+      let connection_error : ApiError = {
+        error: 'Client error',
+        status: 400,
+        message: 'Failed to Connect to DB'
+      }
       res.send(connection_error)
       return
     }
-    console.log('connected as id ' + connection.threadId);
-    res.send({'ping': 'pong'})
+    connection.query(
+      'CALL main_db.get_users();',
+      function(
+        err: mysql.QueryError | null,
+        result: mysql.QueryResult,
+        fileds: mysql.FieldPacket[]
+      ){
+        if (err) throw err;
+        console.log(result)
+        res.send(result)
+      }
+    )
   });
-
 })
-
 
 interface ApiError{
   error: string
