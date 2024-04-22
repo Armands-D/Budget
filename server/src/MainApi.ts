@@ -66,9 +66,7 @@ app.get('/user/:userId/budget/:budgetId', (req: Request, res: Response) => {
       }
     )
 
-    connection.end(function(err: mysql.QueryError | null): void {
-      if (err) throw err;
-    })
+    connection.end()
   });
 })
 

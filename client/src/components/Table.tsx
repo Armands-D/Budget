@@ -14,10 +14,6 @@ function Table(){
       </tr>
     </thead>
 
-  //const data: Budget = require("../sample.json")
-  //let max_rows :number = (expenses.length > incomes.length ? expenses.length : incomes.length )
-  
-
   // spread, unpacks all properties as a prop
   const listingRows = <ListingRows></ListingRows>
   
