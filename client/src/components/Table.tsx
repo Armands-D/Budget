@@ -2,10 +2,15 @@
 import React from 'react';
 // Components
 import {ListingRows} from './ListingRows'
-// Data types
-//import {Budget} from '../data/budget_data_types'
 
-function Table(){
+const DATA = await (async function getData(){
+  const response = await fetch('http://localhost:3001/user/1/budget/1')
+  const data = await response.json()
+  return data
+})()
+
+function Table (){
+
   const headings =
     <thead>
       <tr>
@@ -15,7 +20,8 @@ function Table(){
     </thead>
 
   // spread, unpacks all properties as a prop
-  const listingRows = <ListingRows></ListingRows>
+  console.log(DATA)
+  const listingRows = <ListingRows props={DATA[0]}></ListingRows>
   
   const table =
     <div>

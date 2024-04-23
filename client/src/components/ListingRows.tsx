@@ -7,8 +7,8 @@ function tableSection(name: string, items: {}){
   const heading = <thead></thead>
 }
 
-function ListingRows(props: any){
-  return <div></div>
+function ListingRows({props}: {props: any}){
+  return <div>{Object.values(props).join('/')}</div>
 }
 
 export {ListingRows}
