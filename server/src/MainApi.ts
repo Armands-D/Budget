@@ -3,7 +3,7 @@ import * as mysql from 'mysql2';
 import 'dotenv/config'
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 const DB_PASSWORD = process.env.DB_PASSWORD || 'NULL'
 const DB_USERNAME = process.env.DB_USERNAME || 'NULL'
@@ -11,6 +11,7 @@ const DB_HOST = process.env.DB_HOST || 'NULL'
 const DB_PORT = Number(process.env.DB_PORT)
 
 app.get('/', (req: Request, res: Response) => {
+  res.header("Access-Control-Allow-Origin", "*");
   res.send('Hello World');
 });
 
@@ -19,6 +20,7 @@ app.listen(port, () => {
 });
 
 app.get('/user/:userId/budget/:budgetId', (req: Request, res: Response) => {
+  res.header("Access-Control-Allow-Origin", "*");
   let connection: mysql.Connection = mysql.createConnection({
     host      : DB_HOST,
     port      : DB_PORT,
@@ -55,14 +57,14 @@ app.get('/user/:userId/budget/:budgetId', (req: Request, res: Response) => {
     connection.query(
       `CALL main_db.get_budget(?, ?);`,
       [userId, budgetId],
-      function(
+      function (
         err: mysql.QueryError | null,
         result: mysql.QueryResult,
         fileds: mysql.FieldPacket[]
       ){
         if (err) throw err;
         console.log(result)
-        res.send(JSON.parse(JSON.stringify(result))[0])
+        res.status(200).send(JSON.parse(JSON.stringify(result))[0])
       }
     )
 
