@@ -63,8 +63,19 @@ app.get('/user/:userId/budget/:budgetId', (req: Request, res: Response) => {
         fileds: mysql.FieldPacket[]
       ){
         if (err) throw err;
-        console.log(result)
-        res.status(200).send(JSON.parse(JSON.stringify(result))[0])
+        console.log('result:', result)
+        let result_json : any = JSON.parse(JSON.stringify(result))[0]
+
+        let budget = {income: {}, expenses: {}}
+        for (var row of result_json) {
+          let type : {} = row.type === 'INCOME' ? budget.income : budget.expenses
+          let category : string = row.category
+          if (! type.hasOwnProperty(category)) type[category] = []
+          let entry = {name: row.name, amount: row.amount}
+          type[category].push(entry)
+        }
+
+        res.status(200).send(budget)
       }
     )
 
