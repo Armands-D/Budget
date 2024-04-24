@@ -6,7 +6,7 @@ BEGIN
         b.id as budgetId,
         c.type as type,
         c.name as category,
-        e.name as entry,
+        e.name as name,
         e.amount as amount 
 	FROM main_db.user as u
 		LEFT JOIN main_db.budget AS b ON b.userId = u.id
