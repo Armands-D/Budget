@@ -4,8 +4,10 @@ BEGIN
 		u.username,
 		u.id as userId,
         b.id as budgetId,
+		c.id as categoryId,
         c.type as type,
         c.name as category,
+		e.id as entryId,
         e.name as name,
         e.amount as amount 
 	FROM main_db.user as u

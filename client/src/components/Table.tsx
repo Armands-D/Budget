@@ -22,36 +22,27 @@ function Table (){
     [userId, budgetId]
   )
 
-  const expenses = []
-
-  for (var category in budget.expenses) {
-    var entries = budget.expenses[category]
-    for (var entry of entries){
-      const row = <ListingRows props={entry}></ListingRows>
-      expenses.push(row)
+  function buildCategories(type: 'income' | 'expenses', budget: any): any{
+    let sections : any = []
+    for (var category in budget[type]) {
+      let category_header = <div>{category} {type}</div>
+      let entries = budget[type][category].entries
+      for (let entry of entries){
+        const row = <ListingRows props={entry}></ListingRows>
+        sections.push(<tr>{category_header}{row}</tr>)
+      }
     }
-  }
-
-  const income = []
-
-  for (var category in budget.income) {
-    var entries = budget.income[category]
-    for (var entry of entries){
-      const row = <ListingRows props={entry}></ListingRows>
-      income.push(row)
-    }
+    return sections
   }
 
   const headings =
     <thead>
       <tr>
-        <th>Expenses</th>
       </tr>
-        {expenses}
+        {buildCategories('expenses', {...budget})}
       <tr>
-        <th>Income</th>
       </tr>
-        {income}
+        {buildCategories('income', {...budget})}
     </thead>
 
   

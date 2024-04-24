@@ -67,13 +67,18 @@ app.get('/user/:userId/budget/:budgetId', (req: Request, res: Response) => {
         console.log('result:', result)
         let result_json : any = JSON.parse(JSON.stringify(result))[0]
 
-        let budget = {income: {}, expenses: {}}
+        let budget = {income: {}, expenses: {}, id: result_json.budgetId}
         for (var row of result_json) {
           let type : any = row.type === 'INCOME' ? budget.income : budget.expenses
           let category : string = row.category
-          if (! type.hasOwnProperty(category)) type[category] = []
-          let entry = {name: row.name, amount: row.amount}
-          type[category].push(entry)
+          if (! type.hasOwnProperty(category)) {
+            type[category] = {
+              id: result_json.categoryId,
+              entries: []
+            }
+          }
+          let entry = {id: row.entryId, name: row.name, amount: row.amount}
+          type[category].entries.push(entry)
         }
 
         res.status(200).send(budget)

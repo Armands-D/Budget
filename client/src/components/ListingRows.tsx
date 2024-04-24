@@ -8,7 +8,7 @@ function tableSection(name: string, items: {}){
 }
 
 function ListingRows({props}: {props: any}){
-  return <tr>{Object.values(props).join('/')}</tr>
+  return <div>{JSON.stringify(props)}</div>
 }
 
 export {ListingRows}
