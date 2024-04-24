@@ -8,7 +8,7 @@ function tableSection(name: string, items: {}){
 }
 
 function ListingRows({props}: {props: any}){
-  return <div>{Object.values(props).join('/')}</div>
+  return <tr>{Object.values(props).join('/')}</tr>
 }
 
 export {ListingRows}

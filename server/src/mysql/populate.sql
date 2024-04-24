@@ -12,14 +12,14 @@ SET @income = 'INCOME';
 SET @expense = 'EXPENSE';
 
 INSERT INTO main_db.active_categories (budgetId, name, type)
-VALUES(@budgetId, 'House Hold', @expense);
+VALUES(@budgetId, 'House Hold', @income);
 
 SET @categoryId = LAST_INSERT_ID();
 
 INSERT INTO main_db.active_entries (categoryId, name, amount)
-VALUES(@categoryId, 'Rent', 1200);
+VALUES(@categoryId, 'Salary', 2000);
 INSERT INTO main_db.active_entries (categoryId, name, amount)
-VALUES(@categoryId, 'Groceries', 200);
+VALUES(@categoryId, 'Other', 200);
 
 # Select all users and their budgets
 SELECT u.username, u.id as userId, b.id as budgetId, c.type as type, c.name as category, e.name as entry, e.amount as amount  FROM main_db.user as u
