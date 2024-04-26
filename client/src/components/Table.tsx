@@ -6,6 +6,7 @@ import {ListingRows} from './ListingRows'
 function Table (){
   const userId : number = 1
   const budgetId : number = 1
+  const budgetUpdate = false
 
   // const [budget, setBudget] = React.useState({expenses : {}, income: {}})
   const [budget, setBudget] = React.useState<any>({})
@@ -15,6 +16,7 @@ function Table (){
         const response = await fetch(`http://localhost:3001/user/${userId}/budget/${budgetId}`)
         const data = await response.json()
         setBudget(data)
+        console.log('Get budget:', data)
       }
 
       getData()
