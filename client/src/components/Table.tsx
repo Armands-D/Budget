@@ -4,25 +4,28 @@ import React from 'react';
 import {ListingRows} from './ListingRows'
 
 function Table (){
-  const userId : number = 1
-  const budgetId : number = 1
-  const budgetUpdate = false
+  let userId : number = 1
+  let budgetId : number = 1
 
-  // const [budget, setBudget] = React.useState({expenses : {}, income: {}})
   const [budget, setBudget] = React.useState<any>({})
+  const [budgetUpdate, setBudgetUpdate] = React.useState<any>(true)
 
   React.useEffect(( ) => {
-      async function getData(){
-        const response = await fetch(`http://localhost:3001/user/${userId}/budget/${budgetId}`)
-        const data = await response.json()
-        setBudget(data)
-        console.log('Get budget:', data)
-      }
+    let requestInProgress = true;
+    async function getData(){
+      fetch(`http://localhost:3001/user/${userId}/budget/${budgetId}`)
+      .then( response => {return response.json()})
+      .then( data => {
+        if(requestInProgress){
+          setBudget(data)
+          console.log('Get budget:', data)
+        }
+      })
+    }
+    getData()
+    return () => { requestInProgress = false }
 
-      getData()
-    },
-    [userId, budgetId]
-  )
+  },[userId, budgetId, budgetUpdate])
 
   function buildCategories(type: 'income' | 'expenses', budget: any): any{
     let sections : any = []
@@ -35,6 +38,11 @@ function Table (){
       }
     }
     return sections
+  }
+
+  function f(){
+    console.log(budgetUpdate)
+    setBudgetUpdate(!budgetUpdate)
   }
 
   const headings =
@@ -53,6 +61,7 @@ function Table (){
       <table>
           {headings}
       </table>
+      <button onClick={f}>{String(budgetUpdate)}</button>
     </div>
     
   return table
