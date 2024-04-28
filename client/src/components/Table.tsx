@@ -40,35 +40,30 @@ function Table (){
     return sections
   }
 
-  function f(){
-    console.log(budgetUpdate)
-    setBudgetUpdate(!budgetUpdate)
-  }
+  function buildTable(type : 'income' | 'expenses', budget: any){
+    console.log('Building Table')
 
-  function buildTable(budget: any){
+    if(! budget) return false
 
-
-    if(! budget) return
-
-    let num_categories = Object.keys(budget.expenses).length
+    let num_categories = Object.keys(budget[type]).length
     let num_entries = 0
-    for (var cat in budget.expenses){
-      num_entries += budget.expenses[cat].entries.length
+    for (var cat in budget[type]){
+      num_entries += budget[type][cat].entries.length
     }
     let rowSpan = num_categories + num_entries + 1 // For Self
 
     let rows = []
 
-    for (var cat in budget.expenses){
-      rows.push(<tr><th>{cat}</th></tr>)
-      for(var entry of budget.expenses[cat].entries){
-        rows.push(<tr><th>{JSON.stringify(entry)}</th></tr>)
+    for (var cat in budget[type]){
+      rows.push(<tr key={`row-${cat}`}><th key={`head-${cat}`}>{cat}</th></tr>)
+      for(var entry of budget[type][cat].entries){
+        rows.push(<tr key={`row-${entry.name}`}><td key={`head-${entry.name}`}>{JSON.stringify(entry)}</td></tr>)
       }
     }
-    return <tbody>
-      <tr><th rowSpan={rowSpan}>EXPENSES</th></tr>
-      {rows}
-    </tbody>
+    return [
+      <tr key={`row-${type}-sode-row`} ><th rowSpan={rowSpan} key={`head-${type}-side-row`} className={"example"}>{type.toUpperCase()}</th></tr>,
+      ...rows,
+    ]
   }
 
   const headings =
@@ -83,13 +78,15 @@ function Table (){
     //     {buildCategories('income', {...budget})}
     // </thead>
 
-  
   const table =
     <div>
       <table>
-          {buildTable(budget)}
+        <tbody>
+          {buildTable('expenses', budget)}
+          {buildTable('income', budget)}
+        </tbody>
       </table>
-      <button onClick={f}>{String(budgetUpdate)}</button>
+      <button onClick={e => setBudgetUpdate(!budgetUpdate)}>CLICK</button>
     </div>
     
   return table

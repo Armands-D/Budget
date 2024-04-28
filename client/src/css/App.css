@@ -36,3 +36,25 @@
     transform: rotate(360deg);
   }
 }
+
+table {
+  table-layout: fixed;
+  /* width: 100%; */
+}
+
+.example {
+  /* text-orientation: sideways; */
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  background-color: blue;
+  /* 
+    Width needs be set as a specific length, (as far I can tell, this is a bug)
+    fit-content sets the width to 0, and through unexpected behaviour fixes itself
+    - Sometimes refreshing components
+    - Disabling & enabling width transition-property
+    - Changing other component's properties
+    - Or simply moving to a different window
+    Might be React related, as seemed to work in regular HTML sandbox
+  */
+  width: 6.25%;
+}
