@@ -51,10 +51,10 @@ table {
     Width needs be set as a specific length, (as far I can tell, this is a bug)
     fit-content sets the width to 0, and through unexpected behaviour fixes itself
     - Sometimes refreshing components
-    - Disabling & enabling width transition-property
+    - Disabling & enabling width property or other properties
     - Changing other component's properties
     - Or simply moving to a different window
-    Might be React related, as seemed to work in regular HTML sandbox
+    Might be React related, as seemed to work in native HTML sandbox,
   */
   width: 6.25%;
 }
