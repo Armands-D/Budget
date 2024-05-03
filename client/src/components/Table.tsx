@@ -54,18 +54,18 @@ function Table (){
 
     let rows = []
 
-    for (var cat in budget[type]){
-      let cat_tr_id = `table-tr-cat-${cat}`
-      let cat_th_id = `table-th-cat-${cat}`
+    for (var cat_id in budget[type]){
+      let cat_tr_id = `table-tr-cat-${cat_id}`
+      let cat_th_id = `table-th-cat-${cat_id}`
       rows.push(
         <tr key={cat_tr_id}>
-          <th key={cat_th_id}>{cat}</th>
+          <th key={cat_th_id}>{cat_id}</th>
         </tr>
       )
 
-      for(var entry of budget[type][cat].entries){
-        let entry_tr_id = `table-tr-entry-${cat}-${entry.name}`
-        let entry_td_id = `table-td-entry-${cat}-${entry.name}`
+      for(var entry of budget[type][cat_id].entries){
+        let entry_tr_id = `table-tr-entry-${cat_id}-${entry.id}`
+        let entry_td_id = `table-td-entry-${cat_id}-${entry.id}`
         rows.push(
           <tr key={entry_tr_id}>
             <td key={entry_td_id}>{JSON.stringify(entry)}</td>

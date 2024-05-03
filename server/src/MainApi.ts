@@ -1,22 +1,20 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, Application} from 'express';
 import * as mysql from 'mysql2';
 import 'dotenv/config'
 
-const app = express();
-const port = process.env.PORT || 3001;
+import { ApiError, UserBudget} from './data_types/MainApi';
 
-const DB_PASSWORD = process.env.DB_PASSWORD || 'NULL'
-const DB_USERNAME = process.env.DB_USERNAME || 'NULL'
-const DB_HOST = process.env.DB_HOST || 'NULL'
-const DB_PORT = Number(process.env.DB_PORT)
+const app: Application = express();
+const port : number = Number(process.env.PORT) || 3001;
+
+const DB_PASSWORD : string = process.env.DB_PASSWORD || 'NULL'
+const DB_USERNAME : string = process.env.DB_USERNAME || 'NULL'
+const DB_HOST :string = process.env.DB_HOST || 'NULL'
+const DB_PORT : number = Number(process.env.DB_PORT)
 
 app.get('/', (req: Request, res: Response) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.send('Hello World');
-});
-
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
 });
 
 app.get('/user/:userId/budget/:budgetId', (req: Request, res: Response) => {
@@ -65,19 +63,22 @@ app.get('/user/:userId/budget/:budgetId', (req: Request, res: Response) => {
 
         if (err) throw err;
         console.log('result:', result)
-        let result_json : any = JSON.parse(JSON.stringify(result))[0]
+        console.log(JSON.parse(JSON.stringify(result))[1])
 
-        let budget = {income: {}, expenses: {}, id: result_json.budgetId}
-        for (var row of result_json) {
-          let type : any = row.type === 'INCOME' ? budget.income : budget.expenses
-          let category_id: string = row.categoryId
+        let result_json : UserBudget.Results = JSON.parse(JSON.stringify(result))[0]
+
+        let budget : UserBudget.Reponse = {id: budgetId, income: {}, expenses: {}}
+        for (var row_index in result_json) {
+          var row = result_json[row_index]
+          let type : Record<string, UserBudget.Category> = row.type === 'INCOME' ? budget.income : budget.expenses
+          let category_id: string = String(row.categoryId)
           if (! type.hasOwnProperty(category_id)) {
             type[category_id] = {
               name: row.category,
               entries: []
             }
           }
-          let entry = {id: row.entryId, name: row.name, amount: row.amount}
+          let entry: UserBudget.Entry = {id: row.entryId, name: row.name, amount: row.amount}
           type[category_id].entries.push(entry)
         }
 
@@ -90,8 +91,6 @@ app.get('/user/:userId/budget/:budgetId', (req: Request, res: Response) => {
   });
 })
 
-interface ApiError{
-  error: string
-  status: number
-  message: string
-}
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
+});

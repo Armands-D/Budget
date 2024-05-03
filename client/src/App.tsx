@@ -13,8 +13,8 @@ function App() {
 
   return (
     <div className="App">
-      <Login toggleLogin={toggleLogin}/>
-      {loggedIn && <Table/>}
+      {!loggedIn && <Login toggleLogin={toggleLogin}/>}
+      {loggedIn && [<Table/>, <button onClick={toggleLogin}>Logout</button>]}
     </div>
   );
 }
