@@ -1,5 +1,6 @@
 import express, { Request, Response, Application} from 'express';
 import * as mysql from 'mysql2';
+import * as argon2 from 'argon2'
 import 'dotenv/config'
 
 import { ApiError, UserBudget} from './data_types/MainApi';
@@ -12,6 +13,8 @@ const DB_USERNAME : string = process.env.DB_USERNAME || 'NULL'
 const DB_HOST :string = process.env.DB_HOST || 'NULL'
 const DB_PORT : number = Number(process.env.DB_PORT)
 
+app.use(express.json()) 
+
 app.get('/', (req: Request, res: Response) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.send('Hello World');
@@ -19,16 +22,10 @@ app.get('/', (req: Request, res: Response) => {
 
 app.get('/user/:userId/budget/:budgetId', (req: Request, res: Response) => {
   res.header("Access-Control-Allow-Origin", "*");
-  let connection: mysql.Connection = mysql.createConnection({
-    host      : DB_HOST,
-    port      : DB_PORT,
-    user      : DB_USERNAME,
-    password  : DB_PASSWORD
-  });
+  res.set({ 'content-type': 'application/json; charset=utf-8' });
 
   const userId: number = Number(req.params.userId)
   const budgetId: number = Number(req.params.budgetId)
-
   if (Number.isNaN(userId) || Number.isNaN(budgetId)){
     let param_error : ApiError = {
       error: 'Client Error',
@@ -39,6 +36,12 @@ app.get('/user/:userId/budget/:budgetId', (req: Request, res: Response) => {
     return
   }
   
+  let connection: mysql.Connection = mysql.createConnection({
+    host      : DB_HOST,
+    port      : DB_PORT,
+    user      : DB_USERNAME,
+    password  : DB_PASSWORD
+  });
   connection.connect(function(err: mysql.QueryError | null):void{
 
     if (err) {
@@ -89,6 +92,98 @@ app.get('/user/:userId/budget/:budgetId', (req: Request, res: Response) => {
 
     connection.end()
   });
+})
+
+app.post('/login', async (req, res) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.set({ 'content-type': 'application/json; charset=utf-8' });
+  console.log("Body: ", req.body)
+  if(!(
+    req.body &&
+    req.body.hasOwnProperty('password') &&
+    req.body.hasOwnProperty('email')
+  )){
+    let body_err: ApiError = {
+      error: "Client Error",
+      status: 401, 
+      message: "Body requires password and email."
+    }
+    res.status(401).send(body_err)
+    return
+  }
+
+  let email : string = String(req.body.email)
+  let password : string = String(req.body.password)
+
+  let connection: mysql.Connection = mysql.createConnection({
+    host      : DB_HOST,
+    port      : DB_PORT,
+    user      : DB_USERNAME,
+    password  : DB_PASSWORD
+  });
+  connection.connect(async function(err: mysql.QueryError | null): Promise<any>{
+    if (err){
+      console.error('error connecting: ' + err.stack)
+      let connection_error : ApiError = {
+        error: 'Client error',
+        status: 400,
+        message: 'Failed to Connect to DB'
+      }
+      res.send(connection_error)
+      return
+    }
+
+    connection.query(
+      "SELECT * FROM main_db.user WHERE email = ?",
+      [email],
+      async function (
+        err: mysql.QueryError | null,
+        result: mysql.QueryResult,
+        fileds: mysql.FieldPacket[]
+      ){
+        if(err) throw err
+        console.log('result:', result)
+        // console.log(JSON.parse(JSON.stringify(result))[1])
+        let auth_error: ApiError = {
+          message: "Failed to autheticate: email or password incorrect",
+          status: 401,
+          error: "Failed to authenticate login"
+        }
+
+        type UserDetails = {
+          username: string
+          email: string
+          password: string
+          create_time: string
+        }
+        let result_json : UserDetails = JSON.parse(JSON.stringify(result))[0]
+        console.log(result_json)
+
+        if(!Object.keys(result_json).length){
+          res.send(auth_error)
+          return
+        }
+
+        try{
+          let verified : boolean = await argon2.verify(
+            '$argon2id$v=19$m=65536,t=3,p=4$cGFzc3dvcmQ$LL7xx04g0QX5dNIvbRdNXWMWchh8E8ZM4ZwMr/iSJqs',
+            password,
+          )
+          if(!verified){
+            res.send(auth_error)
+            return
+          }
+          res.send({token: "token"})
+        }catch(e){
+          throw e
+        }
+      }
+    )
+  })
+})
+
+app.post('/create-token', (req, res)=>{
+  res.send("Token")
 })
 
 app.listen(port, () => {
