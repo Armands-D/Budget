@@ -138,16 +138,31 @@ app.post('/login', async (req, res) => {
       [email],
       async function (
         err: mysql.QueryError | null,
-        result: mysql.QueryResult,
-        fileds: mysql.FieldPacket[]
+        result: mysql.RowDataPacket[][],
+        fields: mysql.FieldPacket[]
       ){
         if(err) throw err
         console.log('result:', result)
-        // console.log(JSON.parse(JSON.stringify(result))[1])
+
         let auth_error: ApiError = {
           message: "Failed to autheticate: email or password incorrect",
           status: 401,
           error: "Failed to authenticate login"
+        }
+
+        if(!result.length){
+          res.send(auth_error)
+          return
+        }
+
+        if(result.length > 1){
+          let multiple_result_err : ApiError = {
+            message: "Critical Server Error",
+            status: 500,
+            error: "Multiple Login Users By Email"
+          }
+          res.send(multiple_result_err)
+          throw (multiple_result_err)
         }
 
         type UserDetails = {
@@ -156,16 +171,12 @@ app.post('/login', async (req, res) => {
           password: string
           create_time: string
         }
-        let result_json : UserDetails = JSON.parse(JSON.stringify(result))[0]
-        console.log(result_json)
-
-        if(!Object.keys(result_json).length){
-          res.send(auth_error)
-          return
-        }
+        let user: UserDetails = JSON.parse(JSON.stringify(result))[0]
+        console.log('result_json', user)
 
         try{
           let verified : boolean = await argon2.verify(
+            // password
             '$argon2id$v=19$m=65536,t=3,p=4$cGFzc3dvcmQ$LL7xx04g0QX5dNIvbRdNXWMWchh8E8ZM4ZwMr/iSJqs',
             password,
           )
