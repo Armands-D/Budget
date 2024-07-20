@@ -143,19 +143,27 @@ app.post('/login', async (req, res) => {
       let user: Login.UserDetails = JSON.parse(JSON.stringify(result))[0]
       console.log('result_json', user)
 
-      try{
-        argon2.verify(
-          // password
-          '$argon2id$v=19$m=65536,t=3,p=4$cGFzc3dvcmQ$LL7xx04g0QX5dNIvbRdNXWMWchh8E8ZM4ZwMr/iSJqs',
-          password,
-        ).then((verified: boolean)=>{
-          if(!verified) return sendApiError(res, Login.error_auth)
-          res.send({token: "token"})
-        })
-      }catch(e){
-        console.error('--- Argon2Id Error')
-        throw e
-      }
+      if(!(password === user.password)) return sendApiError(res, Login.error_auth)
+
+      getAuthToken()
+      res.send({token: 'token'})
+
+      // try{
+      //   argon2.verify(
+      //     // password
+      //     '$argon2id$v=19$m=65536,t=3,p=4$cGFzc3dvcmQ$LL7xx04g0QX5dNIvbRdNXWMWchh8E8ZM4ZwMr/iSJqs',
+      //     password,
+      //   ).then((verified: boolean)=>{
+      //     if(!verified) return sendApiError(res, Login.error_auth)
+      //     res.send({token: "token"})
+      //   })
+      // }catch(e){
+      //   console.error('--- Argon2Id Error')
+      //   throw e
+      // }
+    }
+
+    function getAuthToken(){
     }
   })
 })

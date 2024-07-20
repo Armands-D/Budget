@@ -15,7 +15,7 @@ BEGIN
 		LEFT JOIN main_db.active_categories as c ON c.budgetId = b.id
 		LEFT JOIN main_db.active_entries as e ON e.categoryId = c.id
 	WHERE 
-        u.id = userId AND
-        b.id = budgetId
+    u.id = userId AND
+    b.id = budgetId
 	;
 END
