@@ -121,11 +121,7 @@ app.post('/login', async (req, res) => {
   let connection: mysql.Connection = DatabaseConnection()
 
   connection.connect(function(err: mysql.QueryError | null ): void{
-    if (err){
-        console.error('error connecting: ' + err.stack)
-        sendApiError(res, Database.error_db_connect)
-        return
-    }
+    if (err) return sendApiError(res, Database.error_db_connect)
 
     connection.query(
       "SELECT * FROM main_db.user WHERE email = ?",
@@ -139,17 +135,10 @@ app.post('/login', async (req, res) => {
         fields: mysql.FieldPacket[]
     ){
       if(err) throw err
+
       console.log('result:', result)
-
-      if(!result.length){
-        sendApiError(res, Login.error_auth)
-        return
-      }
-
-      if(result.length > 1){
-        sendApiError(res, Login.error_multiple_users)
-        return
-      }
+      if(!result.length) return sendApiError(res, Login.error_auth)
+      if(result.length > 1) return sendApiError(res, Login.error_multiple_users)
 
       let user: Login.UserDetails = JSON.parse(JSON.stringify(result))[0]
       console.log('result_json', user)
@@ -160,10 +149,7 @@ app.post('/login', async (req, res) => {
           '$argon2id$v=19$m=65536,t=3,p=4$cGFzc3dvcmQ$LL7xx04g0QX5dNIvbRdNXWMWchh8E8ZM4ZwMr/iSJqs',
           password,
         ).then((verified: boolean)=>{
-          if(!verified){
-            sendApiError(res, Login.error_auth)
-            return
-          }
+          if(!verified) return sendApiError(res, Login.error_auth)
           res.send({token: "token"})
         })
       }catch(e){
