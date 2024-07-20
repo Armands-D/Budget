@@ -3,7 +3,8 @@ import * as mysql from 'mysql2';
 import * as argon2 from 'argon2'
 import 'dotenv/config'
 
-import { ApiError, UserBudget} from './data_types/MainApi';
+import { ApiError, UserBudget, Login, Database} from './data_types/MainApi';
+import { sendApiError } from './functions/MainApi';
 
 const app: Application = express();
 const port : number = Number(process.env.PORT) || 3001;
@@ -12,6 +13,17 @@ const DB_PASSWORD : string = process.env.DB_PASSWORD || 'NULL'
 const DB_USERNAME : string = process.env.DB_USERNAME || 'NULL'
 const DB_HOST :string = process.env.DB_HOST || 'NULL'
 const DB_PORT : number = Number(process.env.DB_PORT)
+const DatabaseConnection = () :mysql.Connection => {
+  return  mysql.createConnection({
+    host      : DB_HOST,
+    port      : DB_PORT,
+    user      : DB_USERNAME,
+    password  : DB_PASSWORD
+  });
+}
+const DatabaseConnect = (
+  ) :void => {
+}
 
 app.use(express.json()) 
 
@@ -36,12 +48,7 @@ app.get('/user/:userId/budget/:budgetId', (req: Request, res: Response) => {
     return
   }
   
-  let connection: mysql.Connection = mysql.createConnection({
-    host      : DB_HOST,
-    port      : DB_PORT,
-    user      : DB_USERNAME,
-    password  : DB_PASSWORD
-  });
+  let connection: mysql.Connection = DatabaseConnection()
   connection.connect(function(err: mysql.QueryError | null):void{
 
     if (err) {
@@ -98,98 +105,72 @@ app.post('/login', async (req, res) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.set({ 'content-type': 'application/json; charset=utf-8' });
   console.log("Body: ", req.body)
+
   if(!(
     req.body &&
     req.body.hasOwnProperty('password') &&
     req.body.hasOwnProperty('email')
   )){
-    let body_err: ApiError = {
-      error: "Client Error",
-      status: 401, 
-      message: "Body requires password and email."
-    }
-    res.status(401).send(body_err)
+    sendApiError(res, Login.error_body)
     return
   }
 
   let email : string = String(req.body.email)
   let password : string = String(req.body.password)
 
-  let connection: mysql.Connection = mysql.createConnection({
-    host      : DB_HOST,
-    port      : DB_PORT,
-    user      : DB_USERNAME,
-    password  : DB_PASSWORD
-  });
-  connection.connect(async function(err: mysql.QueryError | null): Promise<any>{
+  let connection: mysql.Connection = DatabaseConnection()
+
+  connection.connect(function(err: mysql.QueryError | null ): void{
     if (err){
-      console.error('error connecting: ' + err.stack)
-      let connection_error : ApiError = {
-        error: 'Client error',
-        status: 400,
-        message: 'Failed to Connect to DB'
-      }
-      res.send(connection_error)
-      return
+        console.error('error connecting: ' + err.stack)
+        sendApiError(res, Database.error_db_connect)
+        return
     }
 
     connection.query(
       "SELECT * FROM main_db.user WHERE email = ?",
       [email],
-      async function (
+      validateLogin
+    )
+
+    function validateLogin(
         err: mysql.QueryError | null,
         result: mysql.RowDataPacket[][],
         fields: mysql.FieldPacket[]
-      ){
-        if(err) throw err
-        console.log('result:', result)
+    ){
+      if(err) throw err
+      console.log('result:', result)
 
-        let auth_error: ApiError = {
-          message: "Failed to autheticate: email or password incorrect",
-          status: 401,
-          error: "Failed to authenticate login"
-        }
+      if(!result.length){
+        sendApiError(res, Login.error_auth)
+        return
+      }
 
-        if(!result.length){
-          res.send(auth_error)
-          return
-        }
+      if(result.length > 1){
+        sendApiError(res, Login.error_multiple_users)
+        return
+      }
 
-        if(result.length > 1){
-          let multiple_result_err : ApiError = {
-            message: "Critical Server Error",
-            status: 500,
-            error: "Multiple Login Users By Email"
-          }
-          res.send(multiple_result_err)
-          throw (multiple_result_err)
-        }
+      let user: Login.UserDetails = JSON.parse(JSON.stringify(result))[0]
+      console.log('result_json', user)
 
-        type UserDetails = {
-          username: string
-          email: string
-          password: string
-          create_time: string
-        }
-        let user: UserDetails = JSON.parse(JSON.stringify(result))[0]
-        console.log('result_json', user)
-
-        try{
-          let verified : boolean = await argon2.verify(
-            // password
-            '$argon2id$v=19$m=65536,t=3,p=4$cGFzc3dvcmQ$LL7xx04g0QX5dNIvbRdNXWMWchh8E8ZM4ZwMr/iSJqs',
-            password,
-          )
+      try{
+        argon2.verify(
+          // password
+          '$argon2id$v=19$m=65536,t=3,p=4$cGFzc3dvcmQ$LL7xx04g0QX5dNIvbRdNXWMWchh8E8ZM4ZwMr/iSJqs',
+          password,
+        ).then((verified: boolean)=>{
           if(!verified){
-            res.send(auth_error)
+            sendApiError(res, Login.error_auth)
             return
           }
           res.send({token: "token"})
-        }catch(e){
-          throw e
-        }
+        })
+      }catch(e){
+        console.error('--- Argon2Id Error')
+        throw e
       }
-    )
+    }
   })
 })
 
