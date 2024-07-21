@@ -1,4 +1,5 @@
 import express, { Request, Response, Application} from 'express';
+import cors from 'cors';
 import * as mysql from 'mysql2';
 import * as argon2 from 'argon2'
 import 'dotenv/config'
@@ -25,15 +26,14 @@ const DatabaseConnect = (
   ) :void => {
 }
 
-app.use(express.json()) 
+app.use(cors())
+app.use(express.json())
 
 app.get('/', (req: Request, res: Response) => {
-  res.header("Access-Control-Allow-Origin", "*");
   res.send('Hello World');
 });
 
 app.get('/user/:userId/budget/:budgetId', (req: Request, res: Response) => {
-  res.header("Access-Control-Allow-Origin", "*");
   res.set({ 'content-type': 'application/json; charset=utf-8' });
 
   const userId: number = Number(req.params.userId)
@@ -102,7 +102,6 @@ app.get('/user/:userId/budget/:budgetId', (req: Request, res: Response) => {
 })
 
 app.post('/login', async (req, res) => {
-  res.header("Access-Control-Allow-Origin", "*");
   res.set({ 'content-type': 'application/json; charset=utf-8' });
   console.log("Body: ", req.body)
 

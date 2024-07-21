@@ -4,18 +4,25 @@ function Login({toggleLogin}: {toggleLogin: any}){
     async function handleLogin(){
       const email: any = (document.getElementById('email') as HTMLInputElement).value
       const password : any = (document.getElementById('password') as HTMLInputElement).value
-      console.log(email, password)
-      if(await requestLogin(email, password)){
-        toggleLogin()
-      }
+      console.log("email: ", email, "password: ", password)
+      let response =  await fetchLogin(email, password)
+      if(response.hasOwnProperty('error')) return
+      sessionStorage.setItem("token", response.token)
+      console.log(response)
+      toggleLogin()
     }
 
-    async function requestLogin(email: string, password: string) : Promise<boolean>{
-      return fetch(`http://localhost:3001/login`)
-      .then( response => {return response.json()})
-      .then( data => {
-        return true
+    async function fetchLogin(email: string, password: string) : Promise<any>{
+      return fetch(`http://localhost:3001/login/`,{
+        method: 'POST',
+        body: JSON.stringify({email: email, password: password}),
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        }
       })
+      .then( response => { return response.json()})
+      .then( data => { return data })
     }
 
     return <div>
