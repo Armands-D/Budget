@@ -1,19 +1,19 @@
+import {fetchAPI, isError} from "../functions/ApiRequests"
+import {ApiError} from "API/src/data_types/MainApi"
 
 function Login({toggleLogin}: {toggleLogin: any}){
 
     async function handleLogin(){
       const email: any = (document.getElementById('email') as HTMLInputElement).value
       const password : any = (document.getElementById('password') as HTMLInputElement).value
-      console.log("email: ", email, "password: ", password)
-      let response =  await fetchLogin(email, password)
-      if(response.hasOwnProperty('error')) return
+      let response: ApiError | Record<string, any> =  await fetchLogin(email, password)
+      if(isError(response)) return
       sessionStorage.setItem("token", response.token)
-      console.log(response)
       toggleLogin()
     }
 
     async function fetchLogin(email: string, password: string) : Promise<any>{
-      return fetch(`http://localhost:3001/login/`,{
+      return fetchAPI(`http://localhost:3001/login/`,{
         method: 'POST',
         body: JSON.stringify({email: email, password: password}),
         headers: {
@@ -21,8 +21,6 @@ function Login({toggleLogin}: {toggleLogin: any}){
           "Accept": "application/json",
         }
       })
-      .then( response => { return response.json()})
-      .then( data => { return data })
     }
 
     return <div>

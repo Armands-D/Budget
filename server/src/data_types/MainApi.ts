@@ -50,23 +50,6 @@ export namespace UserBudget {
   }
 }
 
-export interface ResultSetHeader{
-  fieldCount: number
-  affectedRows: number
-  insertId: number
-  info: string
-  serverStatus: number
-  warningStatus: number
-  stateChanges: {
-    systemVariables: any,
-    schema: string
-    gtids: any
-    trackStateChange: any
-  },
-  changedRows: number
-}
-
-
 export namespace Login {
   export const error_auth: ApiError = {
     message: "Failed to autheticate: email or password incorrect",

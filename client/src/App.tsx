@@ -8,6 +8,7 @@ function App() {
   const [loggedIn, setLoggedIn] = React.useState(false)
 
   function toggleLogin(){
+    if(loggedIn) sessionStorage.removeItem("token")
     setLoggedIn(!loggedIn)
   }
 
