@@ -87,9 +87,11 @@ export namespace Login {
   }
 
   export interface UserDetails{
+    userId: number
     username: string
     email: string
     password: string
     create_time: string
+    token: string
   }
 }

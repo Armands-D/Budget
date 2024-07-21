@@ -124,19 +124,25 @@ app.post('/login', async (req, res) => {
     if (err) return sendApiError(res, Database.error_db_connect)
 
     connection.query(
-      "SELECT * FROM main_db.user WHERE email = ?",
+      `SELECT
+      	u.username AS userName,
+		    u.email,
+        u.password,
+		    u.id AS userId
+      FROM main_db.user AS u
+        WHERE email = ?`,
       [email],
       validateLogin
     )
 
     function validateLogin(
         err: mysql.QueryError | null,
-        result: mysql.RowDataPacket[][],
+        result: mysql.RowDataPacket[],
         fields: mysql.FieldPacket[]
     ){
       if(err) throw err
 
-      console.log('result:', result)
+      console.log('Validate Login result:', result)
       if(!result.length) return sendApiError(res, Login.error_auth)
       if(result.length > 1) return sendApiError(res, Login.error_multiple_users)
 
@@ -145,8 +151,7 @@ app.post('/login', async (req, res) => {
 
       if(!(password === user.password)) return sendApiError(res, Login.error_auth)
 
-      getAuthToken()
-      res.send({token: 'token'})
+      return getAuthToken(user)
 
       // try{
       //   argon2.verify(
@@ -163,7 +168,23 @@ app.post('/login', async (req, res) => {
       // }
     }
 
-    function getAuthToken(){
+    function getAuthToken(user: Login.UserDetails) {
+      connection.query(
+        "CALL main_db.refresh_auth_token(?)",
+        [user.userId],
+        function(
+          err: mysql.QueryError | null,
+          result: mysql.ProcedureCallPacket<mysql.RowDataPacket[]>,
+          fields: mysql.FieldPacket[]
+        ){
+          if(err) throw(err);
+          let rows: mysql.RowDataPacket[] = result[0]
+          let header: mysql.ResultSetHeader = result[1]
+          console.log("GetAuthToken rows:", rows, "header: ", header)
+          let user_details: Login.UserDetails = JSON.parse(JSON.stringify(rows[0]))
+          res.send({token: user_details.token})
+        }
+      )
     }
   })
 })
