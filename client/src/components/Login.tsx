@@ -1,15 +1,15 @@
 import {fetchAPI, isError} from "../functions/ApiRequests"
 import {ApiError} from "API/src/data_types/MainApi"
 
-function Login({toggleLogin}: {toggleLogin: any}){
+function Login({toggleLogin}: {toggleLogin: () => void}){
 
     async function handleLogin(){
-      const email: any = (document.getElementById('email') as HTMLInputElement).value
-      const password : any = (document.getElementById('password') as HTMLInputElement).value
+      const email: string = String((document.getElementById('email') as HTMLInputElement).value)
+      const password : string = String((document.getElementById('password') as HTMLInputElement).value)
       let response: ApiError | Record<string, any> =  await fetchLogin(email, password)
       if(isError(response)) return
-      sessionStorage.setItem("token", response.token)
-      toggleLogin()
+      // sessionStorage.setItem("token", response.token)
+      // toggleLogin()
     }
 
     async function fetchLogin(email: string, password: string) : Promise<any>{

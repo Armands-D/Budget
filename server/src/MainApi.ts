@@ -1,5 +1,6 @@
 import express, { Request, Response, Application} from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import * as mysql from 'mysql2';
 import * as argon2 from 'argon2'
 import 'dotenv/config'
@@ -22,12 +23,10 @@ const DatabaseConnection = () :mysql.Connection => {
     password  : DB_PASSWORD
   });
 }
-const DatabaseConnect = (
-  ) :void => {
-}
 
-app.use(cors())
+app.use(cors({origin: "http://localhost:3000",credentials: true,}))
 app.use(express.json())
+app.use(cookieParser());
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello World');
@@ -102,6 +101,7 @@ app.get('/user/:userId/budget/:budgetId', (req: Request, res: Response) => {
 })
 
 app.post('/login', async (req, res) => {
+  // res.setHeader('Access-Control-Allow-Origin',  'http://localhost:3001/')
   res.set({ 'content-type': 'application/json; charset=utf-8' });
   console.log("Body: ", req.body)
 
@@ -116,6 +116,7 @@ app.post('/login', async (req, res) => {
 
   let email : string = String(req.body.email)
   let password : string = String(req.body.password)
+  // TODO: Check if valid email
 
   let connection: mysql.Connection = DatabaseConnection()
 
@@ -181,6 +182,15 @@ app.post('/login', async (req, res) => {
           let header: mysql.ResultSetHeader = result[1]
           console.log("GetAuthToken rows:", rows, "header: ", header)
           let user_details: Login.UserDetails = JSON.parse(JSON.stringify(rows[0]))
+          // TODO: Figure out how cookies work
+          res.cookie("token", user_details.token, {
+            httpOnly: true,
+            path: "/",
+            domain: "localhost",
+            secure: false,
+            sameSite: "none",
+            maxAge: 1000 * 60 * 60,
+          })
           res.send({token: user_details.token})
         }
       )
