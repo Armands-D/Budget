@@ -1,4 +1,9 @@
+**Tags:
+#npm #http #fetch
+
 # Node Packages
+## nodemon
+Auto refresh node server on file change. Useful for refreshing express app on server code change.
 
 # HTTP Request
 
@@ -67,13 +72,14 @@ Needs to allow the sending of credentials (cookies), explains credentials for se
 > [Mozilla Docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials)
 ## Server
 ### CORS
-CORS Config
+**CORS Config
 ```ts
 import cors from 'cors';
 app.use(cors({origin: "http://localhost:3000",credentials: true,}))
 
 ```
-Headers:
+
+**Headers:
 ```json
 req.setHeader("Access-Control-Allow-Origin", "http://localhost:3001") // Client side host with http protocol specified
 ```
@@ -81,6 +87,7 @@ req.setHeader("Access-Control-Allow-Origin", "http://localhost:3001") // Client 
 ### Cookies
 [Blog Explaining express response cookie options](https://dev.to/alexmercedcoder/expressjs-handling-cross-origin-cookies-38l9)
 
+**Express
 ```ts
 import cookieParser from 'cookie-parser';
 app.use(cookieParser());
@@ -99,3 +106,11 @@ app.post('/login', async (req, res) => {
 	...
 	res.send({token: token})
 ```
+
+# Express
+
+## Best Practices
+- [Use gzip compression](https://expressjs.com/en/advanced/best-practice-performance.html#use-gzip-compression)
+- [Don’t use synchronous functions](https://expressjs.com/en/advanced/best-practice-performance.html#dont-use-synchronous-functions)
+- [Do logging correctly](https://expressjs.com/en/advanced/best-practice-performance.html#do-logging-correctly)
+- [Handle exceptions properly](https://expressjs.com/en/advanced/best-practice-performance.html#handle-exceptions-properly)

@@ -1,7 +1,7 @@
 import express, { Request, Response, Application} from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import * as mysql from 'mysql2';
+import * as mysql from 'mysql2/promise';
 import * as argon2 from 'argon2'
 import 'dotenv/config'
 
@@ -15,7 +15,7 @@ const DB_PASSWORD : string = process.env.DB_PASSWORD || 'NULL'
 const DB_USERNAME : string = process.env.DB_USERNAME || 'NULL'
 const DB_HOST :string = process.env.DB_HOST || 'NULL'
 const DB_PORT : number = Number(process.env.DB_PORT)
-const DatabaseConnection = () :mysql.Connection => {
+const DatabaseConnection = () :Promise<mysql.Connection> => {
   return  mysql.createConnection({
     host      : DB_HOST,
     port      : DB_PORT,
@@ -118,40 +118,53 @@ app.post('/login', async (req, res) => {
   let password : string = String(req.body.password)
   // TODO: Check if valid email
 
-  let connection: mysql.Connection = DatabaseConnection()
 
-  connection.connect(function(err: mysql.QueryError | null ): void{
-    if (err) return sendApiError(res, Database.error_db_connect)
+  // connection.connect(function(err: mysql.QueryError | null ): void{
+    // if (err) return sendApiError(res, Database.error_db_connect)
 
-    connection.query(
-      `SELECT
-      	u.username AS userName,
-		    u.email,
-        u.password,
-		    u.id AS userId
-      FROM main_db.user AS u
-        WHERE email = ?`,
-      [email],
-      validateLogin
-    )
+  try{
+    DatabaseConnection()
+    .then(async (connection : mysql.Connection) => {
+      let [results, fields] : [mysql.RowDataPacket[], mysql.FieldPacket[]] =
+        await connection.query<mysql.RowDataPacket[]>(
+        `SELECT
+        	u.username AS userName,
+		      u.email,
+          u.password,
+		      u.id AS userId
+        FROM main_db.user AS u
+          WHERE email = ?`,
+        [email]
+      )
+
+      let loginError: ApiError | null = validateLogin(results, fields)
+
+      if(loginError) return sendApiError(res, loginError)
+      
+      let user_info : Login.UserDetails = JSON.parse(JSON.stringify(results))[0]
+
+      getAuthToken(connection, user_info)
+    })
+  }catch(error: Error | unknown){
+    console.log(error)
+  }
 
     function validateLogin(
-        err: mysql.QueryError | null,
         result: mysql.RowDataPacket[],
         fields: mysql.FieldPacket[]
-    ){
-      if(err) throw err
+    ): ApiError | null {
 
       console.log('Validate Login result:', result)
-      if(!result.length) return sendApiError(res, Login.error_auth)
-      if(result.length > 1) return sendApiError(res, Login.error_multiple_users)
+      if(!result.length) return Login.error_auth
+      if(result.length > 1) return Login.error_multiple_users
 
       let user: Login.UserDetails = JSON.parse(JSON.stringify(result))[0]
       console.log('result_json', user)
 
-      if(!(password === user.password)) return sendApiError(res, Login.error_auth)
+      if(!(password === user.password)) return Login.error_auth
+      return null
 
-      return getAuthToken(user)
+      // return getAuthToken(user)
 
       // try{
       //   argon2.verify(
@@ -168,21 +181,17 @@ app.post('/login', async (req, res) => {
       // }
     }
 
-    function getAuthToken(user: Login.UserDetails) {
-      connection.query(
+    async function getAuthToken(connection: mysql.Connection, user: Login.UserDetails) {
+      connection.query<mysql.ProcedureCallPacket<mysql.ResultSetHeader>>(
         "CALL main_db.refresh_auth_token(?)",
-        [user.userId],
-        function(
-          err: mysql.QueryError | null,
-          result: mysql.ProcedureCallPacket<mysql.RowDataPacket[]>,
-          fields: mysql.FieldPacket[]
-        ){
-          if(err) throw(err);
+        [user.userId]
+      ).then((
+        [result, fields] : [mysql.ResultSetHeader, mysql.FieldPacket[]]
+      )=>{
           let rows: mysql.RowDataPacket[] = result[0]
           let header: mysql.ResultSetHeader = result[1]
           console.log("GetAuthToken rows:", rows, "header: ", header)
           let user_details: Login.UserDetails = JSON.parse(JSON.stringify(rows[0]))
-          // TODO: Figure out how cookies work
           res.cookie("token", user_details.token, {
             httpOnly: true,
             path: "/",
@@ -192,10 +201,9 @@ app.post('/login', async (req, res) => {
             maxAge: 1000 * 60 * 60,
           })
           res.send({token: user_details.token})
-        }
-      )
+      })
     }
-  })
+  // })
 })
 
 app.post('/create-token', (req, res)=>{
