@@ -163,16 +163,17 @@ app.post('/login', async (req, res) => {
   }
 
   async function getAuthToken(connection: mysql.Connection, user: Login.UserDetails) {
+    const token: string = Buffer.from(`${user.email}:${user.password}`).toString('base64')
     connection.query<mysql.ProcedureCallPacket<mysql.RowDataPacket[]>>(
-      "CALL main_db.refresh_auth_token(?)",
-      [user.userId]
+      "CALL main_db.refresh_auth_token(?, ?)",
+      [user.userId, token]
     ).then((
       [[rows, header], fields]
       : [[mysql.RowDataPacket[], mysql.ResultSetHeader], mysql.FieldPacket[]]
     )=>{
         console.log("GetAuthToken rows:", rows, "header: ", header)
-        let user_details: Login.UserDetails = JSON.parse(JSON.stringify(rows[0]))
-        res.cookie("token", user_details.token, {
+        // let user_details: Login.UserDetails = JSON.parse(JSON.stringify(rows[0]))
+        res.cookie("token", token, {
           httpOnly: true,
           path: "/",
           domain: "localhost",
@@ -180,7 +181,7 @@ app.post('/login', async (req, res) => {
           sameSite: "none",
           maxAge: 1000 * 60 * 60,
         })
-        res.send({token: user_details.token})
+        res.send({token: token})
     })
   }
 })
