@@ -6,3 +6,9 @@ export function sendApiError(res: Response, api_error: ApiError){
   res.status(api_error.status)
     .send(api_error)
 }
+
+export function Logger(caller: string){
+  return function log(...args: any){
+    console.log(`[${caller}]:`, ...args)
+  }
+}

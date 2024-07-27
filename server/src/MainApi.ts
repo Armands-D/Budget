@@ -6,7 +6,7 @@ import * as argon2 from 'argon2'
 import 'dotenv/config'
 
 import { ApiError, UserBudget, Login, Database} from './data_types/MainApi';
-import { sendApiError } from './functions/MainApi';
+import { sendApiError, Logger } from './functions/MainApi';
 
 const app: Application = express();
 const port : number = Number(process.env.PORT) || 3001;
@@ -36,11 +36,11 @@ async function safeDBConnection(fun: (conenction: mysql.Connection) => Promise<v
 }
 
 async function authoriseUserToken(connection: mysql.Connection, token: string): Promise<boolean>{
-  console.log('authoriseUserToken', token)
+  const log = Logger('authoriseUserToken')
+
   const decoded_token = Buffer.from(token, 'base64').toString()
-  console.log('authoriseUserToken: decoded:', decoded_token)
+  log('decoded: ', decoded_token)
   const [email, password] : (string)[] = decoded_token.split(':')
-  console.log("email, password: ", email, password)
   return connection.query<mysql.RowDataPacket[]>(
     'SELECT * FROM main_db.user WHERE email = ?',
     [email]
@@ -48,7 +48,7 @@ async function authoriseUserToken(connection: mysql.Connection, token: string): 
     [results, fields]
     : [mysql.RowDataPacket[], mysql.FieldPacket[]]
   )=>{
-    console.log('authoriseUserToken results: ', results)
+    log('results: ', results)
     let user_details: Login.UserDetails = JSON.parse(JSON.stringify(results))[0] 
     return user_details.password === password
   })
@@ -64,6 +64,7 @@ app.get('/', (req: Request, res: Response) => {
 
 app.get('/user/:userId/budget/:budgetId', (req: Request, res: Response) => {
   res.set({ 'content-type': 'application/json; charset=utf-8' });
+  const log = Logger('GET/user/{userId}/budget/{budgetId}')
 
   const userId: number = Number(req.params.userId)
   const budgetId: number = Number(req.params.budgetId)
@@ -84,8 +85,8 @@ app.get('/user/:userId/budget/:budgetId', (req: Request, res: Response) => {
         [userId, budgetId],
     )
     
-    console.log('result:', results)
-    console.log(JSON.parse(JSON.stringify(results))[1])
+    log('result:', results)
+    log(JSON.parse(JSON.stringify(results))[1])
 
     let result_json : UserBudget.Results = JSON.parse(JSON.stringify(results))[0]
 
@@ -104,7 +105,7 @@ app.get('/user/:userId/budget/:budgetId', (req: Request, res: Response) => {
       type[category_id].entries.push(entry)
     }
 
-    console.log('transformed res: ', JSON.stringify(budget, null, 2))
+    log('transformed res: ', JSON.stringify(budget, null, 2))
     res.status(200).send(budget)
   })
 })
@@ -153,13 +154,14 @@ app.post('/login', async (req, res) => {
       result: mysql.RowDataPacket[],
       fields: mysql.FieldPacket[]
   ): ApiError | null {
+    const log = Logger('validateLogin')
 
-    console.log('Validate Login result:', result)
+    log('Validate Login result:', result)
     if(!result.length) return Login.error_auth
     if(result.length > 1) return Login.error_multiple_users
 
     let user: Login.UserDetails = JSON.parse(JSON.stringify(result))[0]
-    console.log('result_json', user)
+    log('result_json', user)
 
     if(!(password === user.password)) return Login.error_auth
     return null
@@ -182,7 +184,8 @@ app.post('/login', async (req, res) => {
   }
 
   async function getAuthToken(connection: mysql.Connection, user: Login.UserDetails) {
-    console.log('getAuthToken', user)
+    const log = Logger('getAuthToken')
+    log('user: ', user)
     const token: string = Buffer.from(`${user.email}:${user.password}`).toString('base64')
     return connection.query<mysql.ProcedureCallPacket<mysql.RowDataPacket[]>>(
       "CALL main_db.refresh_auth_token(?, ?)",
@@ -191,7 +194,7 @@ app.post('/login', async (req, res) => {
       [[results, header], fields]
       : [[mysql.RowDataPacket[], mysql.ResultSetHeader], mysql.FieldPacket[]]
     )=>{
-      console.log("GetAuthToken results:", results, "header: ", header)
+      console.log("results:", results, "header: ", header)
       res.cookie("token", token, {
         httpOnly: true,
         path: "/",
@@ -201,7 +204,7 @@ app.post('/login', async (req, res) => {
         maxAge: 1000 * 60 * 60,
       })
       res.send({token: token})
-      console.log("User Auth", await authoriseUserToken(connection, token))
+      log("User Auth", await authoriseUserToken(connection, token))
     })
   }
 })
