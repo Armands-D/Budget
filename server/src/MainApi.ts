@@ -27,9 +27,9 @@ const DatabaseConnection = () :Promise<mysql.Connection> => {
 async function safeDBConnection(fun: (conenction: mysql.Connection) => Promise<void>){
   try{
     return DatabaseConnection()
-    .then((connection: mysql.Connection)=>{
+    .then((connection: mysql.Connection) =>
       fun(connection).then(() => connection.end())
-    })
+    )
   }catch(error: Error | unknown){
     console.log(error)
   }
@@ -106,7 +106,6 @@ app.post('/login', async (req, res) => {
 
   let email : string = String(req.body.email)
   let password : string = String(req.body.password)
-  // TODO: Check if valid email
 
   safeDBConnection(async (connection: mysql.Connection)=>{
     let [results, fields] : [mysql.RowDataPacket[], mysql.FieldPacket[]] =
@@ -128,7 +127,7 @@ app.post('/login', async (req, res) => {
     let user_info : Login.UserDetails = JSON.parse(JSON.stringify(results))[0]
 
     getAuthToken(connection, user_info)
-  }).then(()=> console.log("LAST THING"))
+  })
   // TODO: Make this work
 
   function validateLogin(
