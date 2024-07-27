@@ -4,6 +4,12 @@ export interface ApiError{
   message: string
 }
 
+export const missing_authorization_error : ApiError = {
+  message: "Authorization Header Missing",
+  status: 403,
+  error: "Failed to authorize user request because authorization header is missing"
+}
+
 export namespace Database{
   export let error_db_connect: ApiError = {
     error: 'Critical Server Error',

@@ -12,15 +12,19 @@ function Table (){
 
   React.useEffect(( ) => {
     let requestInProgress = true;
+    let token: any = document.cookie
+    console.log('cookie', token)
     async function getData(){
-      fetch(`http://localhost:3001/user/${userId}/budget/${budgetId}`)
-      .then( response => {return response.json()})
-      .then( data => {
-        if(requestInProgress){
-          setBudget(data)
-          console.log('Get budget:', data)
-        }
+      fetch(`http://localhost:3001/user/${userId}/budget/${budgetId}`,{
+        credentials: "include"
       })
+      // .then( response => {return response.json()})
+      // .then( data => {
+      //   if(requestInProgress){
+      //     setBudget(data)
+      //     console.log('Get budget:', data)
+      //   }
+      // })
     }
     getData()
     return () => { requestInProgress = false }

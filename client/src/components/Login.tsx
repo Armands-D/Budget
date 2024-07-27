@@ -9,7 +9,7 @@ function Login({toggleLogin}: {toggleLogin: () => void}){
       let response: ApiError | Record<string, any> =  await fetchLogin(email, password)
       if(isError(response)) return
       // sessionStorage.setItem("token", response.token)
-      // toggleLogin()
+      toggleLogin()
     }
 
     async function fetchLogin(email: string, password: string) : Promise<any>{

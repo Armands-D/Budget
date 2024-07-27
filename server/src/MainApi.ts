@@ -5,7 +5,7 @@ import * as mysql from 'mysql2/promise';
 import * as argon2 from 'argon2'
 import 'dotenv/config'
 
-import { ApiError, UserBudget, Login, Database} from './data_types/MainApi';
+import { ApiError, missing_authorization_error, UserBudget, Login, Database} from './data_types/MainApi';
 import { sendApiError, Logger } from './functions/MainApi';
 
 const app: Application = express();
@@ -65,7 +65,9 @@ app.get('/', (req: Request, res: Response) => {
 app.get('/user/:userId/budget/:budgetId', (req: Request, res: Response) => {
   res.set({ 'content-type': 'application/json; charset=utf-8' });
   const log = Logger('GET/user/{userId}/budget/{budgetId}')
+  if(!(req.cookies && req.cookies.token)) return sendApiError(res, missing_authorization_error)
 
+  return
   const userId: number = Number(req.params.userId)
   const budgetId: number = Number(req.params.budgetId)
   if (Number.isNaN(userId) || Number.isNaN(budgetId)){
@@ -156,12 +158,12 @@ app.post('/login', async (req, res) => {
   ): ApiError | null {
     const log = Logger('validateLogin')
 
-    log('Validate Login result:', result)
+    log('result:', result)
     if(!result.length) return Login.error_auth
     if(result.length > 1) return Login.error_multiple_users
 
     let user: Login.UserDetails = JSON.parse(JSON.stringify(result))[0]
-    log('result_json', user)
+    log('user:', user)
 
     if(!(password === user.password)) return Login.error_auth
     return null
@@ -200,11 +202,11 @@ app.post('/login', async (req, res) => {
         path: "/",
         domain: "localhost",
         secure: false,
-        sameSite: "none",
+        sameSite: "lax",
         maxAge: 1000 * 60 * 60,
       })
       res.send({token: token})
-      log("User Auth", await authoriseUserToken(connection, token))
+      log("User Auth:", await authoriseUserToken(connection, token))
     })
   }
 })
