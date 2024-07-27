@@ -35,6 +35,25 @@ async function safeDBConnection(fun: (conenction: mysql.Connection) => Promise<v
   }
 }
 
+async function authoriseUserToken(connection: mysql.Connection, token: string): Promise<boolean>{
+  console.log('authoriseUserToken', token)
+  const decoded_token = Buffer.from(token, 'base64').toString()
+  console.log('authoriseUserToken: decoded:', decoded_token)
+  const [email, password] : (string)[] = decoded_token.split(':')
+  console.log("email, password: ", email, password)
+  return connection.query<mysql.RowDataPacket[]>(
+    'SELECT * FROM main_db.user WHERE email = ?',
+    [email]
+  ).then((
+    [results, fields]
+    : [mysql.RowDataPacket[], mysql.FieldPacket[]]
+  )=>{
+    console.log('authoriseUserToken results: ', results)
+    let user_details: Login.UserDetails = JSON.parse(JSON.stringify(results))[0] 
+    return user_details.password === password
+  })
+}
+
 app.use(cors({origin: "http://localhost:3000",credentials: true,}))
 app.use(express.json())
 app.use(cookieParser());
@@ -126,7 +145,7 @@ app.post('/login', async (req, res) => {
     
     let user_info : Login.UserDetails = JSON.parse(JSON.stringify(results))[0]
 
-    getAuthToken(connection, user_info)
+    await getAuthToken(connection, user_info)
   })
   // TODO: Make this work
 
@@ -163,25 +182,26 @@ app.post('/login', async (req, res) => {
   }
 
   async function getAuthToken(connection: mysql.Connection, user: Login.UserDetails) {
+    console.log('getAuthToken', user)
     const token: string = Buffer.from(`${user.email}:${user.password}`).toString('base64')
-    connection.query<mysql.ProcedureCallPacket<mysql.RowDataPacket[]>>(
+    return connection.query<mysql.ProcedureCallPacket<mysql.RowDataPacket[]>>(
       "CALL main_db.refresh_auth_token(?, ?)",
       [user.userId, token]
-    ).then((
-      [[rows, header], fields]
+    ).then(async(
+      [[results, header], fields]
       : [[mysql.RowDataPacket[], mysql.ResultSetHeader], mysql.FieldPacket[]]
     )=>{
-        console.log("GetAuthToken rows:", rows, "header: ", header)
-        // let user_details: Login.UserDetails = JSON.parse(JSON.stringify(rows[0]))
-        res.cookie("token", token, {
-          httpOnly: true,
-          path: "/",
-          domain: "localhost",
-          secure: false,
-          sameSite: "none",
-          maxAge: 1000 * 60 * 60,
-        })
-        res.send({token: token})
+      console.log("GetAuthToken results:", results, "header: ", header)
+      res.cookie("token", token, {
+        httpOnly: true,
+        path: "/",
+        domain: "localhost",
+        secure: false,
+        sameSite: "none",
+        maxAge: 1000 * 60 * 60,
+      })
+      res.send({token: token})
+      console.log("User Auth", await authoriseUserToken(connection, token))
     })
   }
 })
