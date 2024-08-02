@@ -40,7 +40,7 @@ export async function safeDBConnection(
   }
 }
 
-export async function authoriseUserToken(connection: mysql.Connection, token: string): Promise<boolean>{
+export async function authoriseUserToken(connection: mysql.Connection, token: string): Promise<ApiError | null>{
   const log = Logger('authoriseUserToken')
 
   const decoded_token = Buffer.from(token, 'base64').toString()
@@ -55,6 +55,11 @@ export async function authoriseUserToken(connection: mysql.Connection, token: st
   )=>{
     log('results: ', results)
     let user_details: Login.UserDetails = JSON.parse(JSON.stringify(results))[0] 
-    return user_details.password === password
+    if (user_details.password === password) return null
+    return {
+      error: "Failed to authenticate user token",
+      status: 401,
+      message: "Error Unauthorized"
+    }
   })
 }

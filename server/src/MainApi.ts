@@ -7,12 +7,10 @@ import 'dotenv/config'
 
 import { ApiError, missing_authorization_error, UserBudget, Login, Database} from './data_types/MainApi';
 import { safeDBConnection, sendApiError, Logger } from './functions/MainApi';
-import { POST } from './endpoints/Endpoints';
+import { POST, GET } from './endpoints/Endpoints';
 
 const app: Application = express();
 const port : number = Number(process.env.PORT) || 3001;
-
-
 
 app.use(cors({origin: "http://localhost:3000",credentials: true,}))
 app.use(express.json())
@@ -22,13 +20,9 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Hello World');
 });
 
-app.get('/user/:userId/budget/:budgetId', async (req: Request, res: Response) => {
-  res.status(200).send({good: 1})
-})
+app.get('/user/:userId/budget/:budgetId', GET.userBudget)
 
-app.post('/login', async (req, res) => {
-  POST.loginUser(req, res)
-})
+app.post('/login', POST.loginUser)
 
 app.post('/create-token', (req, res)=>{
   res.send("Token")
