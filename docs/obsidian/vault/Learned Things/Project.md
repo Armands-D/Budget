@@ -114,3 +114,6 @@ app.post('/login', async (req, res) => {
 - [Don’t use synchronous functions](https://expressjs.com/en/advanced/best-practice-performance.html#dont-use-synchronous-functions)
 - [Do logging correctly](https://expressjs.com/en/advanced/best-practice-performance.html#do-logging-correctly)
 - [Handle exceptions properly](https://expressjs.com/en/advanced/best-practice-performance.html#handle-exceptions-properly)
+
+# Base64
+The encoding is stored in 6 bit increments, meaning that some encoded strings can be padded with 0s, resulting in a repeated '=' pattern. Meaning the '=' padding can be removed and still decode to the same string. Found this out when I was testing token authentication and was confused why removing characters resulted in the same decoding.

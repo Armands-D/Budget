@@ -16,13 +16,13 @@ function Table (){
       fetch(`http://localhost:3001/user/${userId}/budget/${budgetId}`,{
         credentials: "include"
       })
-      // .then( response => {return response.json()})
-      // .then( data => {
-      //   if(requestInProgress){
-      //     setBudget(data)
-      //     console.log('Get budget:', data)
-      //   }
-      // })
+      .then( response => {return response.json()})
+      .then( data => {
+        if(requestInProgress){
+          setBudget(data)
+          console.log('Get budget:', data)
+        }
+      })
     }
     getData()
     return () => { requestInProgress = false }

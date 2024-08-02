@@ -60,19 +60,43 @@ async function transformBudgetResults(
 {
   let result_json : UserBudget.Results = JSON.parse(JSON.stringify(results))[0]
 
-  let budget : UserBudget.Reponse = {id: budgetId, income: {}, expenses: {}}
+  let budget : UserBudget.Reponse = {
+    budgetId: budgetId,
+    income: {
+      categories: [],
+      total: 0
+    },
+    expenses: {
+      categories: [],
+      total: 0
+    }
+  }
+
+  let category_entries_by_id: Record<number, (UserBudget.Entry)[]> = {}
+  let unique_categories : (UserBudget.Category)[] = []
   for (var row_index in result_json) {
     var row = result_json[row_index]
-    let type : Record<string, UserBudget.Category> = row.type === 'INCOME' ? budget.income : budget.expenses
-    let category_id: string = String(row.categoryId)
-    if (! type.hasOwnProperty(category_id)) {
-      type[category_id] = {
-        name: row.category,
-        entries: []
-      }
+    let category_id : number = row.categoryId
+    let category : UserBudget.Category = {
+      categoryId: category_id,
+      name: row.category,
+      total: 0,
+      entries: []
     }
-    let entry: UserBudget.Entry = {id: row.entryId, name: row.name, amount: row.amount}
-    type[category_id].entries.push(entry)
+
+    // let categories : (UserBudget.Category)[] =
+    //   row.type === 'INCOME' ?
+    //     budget.income.categories:
+    //     budget.expenses.categories;
+    
+    if(!(category_id in category_entries_by_id)){
+      category_entries_by_id[category_id] = []
+      unique_categories.push(category)
+    }
+    
+    let entry: UserBudget.Entry = {entryId: row.entryId, name: row.name, amount: row.amount}
+    category_entries_by_id[category_id].push(entry)
   }
   return budget
 }
+

@@ -24,18 +24,26 @@ export namespace Database{
 export namespace UserBudget {
 
   export interface Reponse{
-    id: number
-    income: Record<string, Category>
-    expenses: Record<string, Category>
+    budgetId: number
+    income: {
+      categories: (Category)[]
+      total: number
+    }
+    expenses: {
+      categories: (Category)[]
+      total: number
+    }
   }
 
   export interface Category {
     name: string
+    categoryId: number
     entries: Entry[]
+    total: number
   }
 
   export interface Entry {
-    id: number
+    entryId: number
     name: string
     amount: number
   }
