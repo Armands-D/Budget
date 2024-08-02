@@ -12,8 +12,6 @@ function Table (){
 
   React.useEffect(( ) => {
     let requestInProgress = true;
-    let token: any = document.cookie
-    console.log('cookie', token)
     async function getData(){
       fetch(`http://localhost:3001/user/${userId}/budget/${budgetId}`,{
         credentials: "include"
