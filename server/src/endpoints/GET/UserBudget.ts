@@ -60,43 +60,46 @@ async function transformBudgetResults(
 {
   let result_json : UserBudget.Results = JSON.parse(JSON.stringify(results))[0]
 
-  let budget : UserBudget.Reponse = {
-    budgetId: budgetId,
-    income: {
-      categories: [],
-      total: 0
-    },
-    expenses: {
-      categories: [],
-      total: 0
-    }
-  }
+  let unique_income_categories : Record<number, UserBudget.Category> = {}
+  let unique_expense_categories : Record<number, UserBudget.Category> = {}
+  let income_total: number = 0
+  let expense_total: number = 0
 
-  let category_entries_by_id: Record<number, (UserBudget.Entry)[]> = {}
-  let unique_categories : (UserBudget.Category)[] = []
   for (var row_index in result_json) {
     var row = result_json[row_index]
     let category_id : number = row.categoryId
-    let category : UserBudget.Category = {
+    let new_category : UserBudget.Category = {
       categoryId: category_id,
       name: row.category,
       total: 0,
       entries: []
     }
+    
+    let unique_type_category: Record<number, UserBudget.Category> =
+      row.type === 'EXPENSE' ?
+      unique_expense_categories : unique_income_categories
 
-    // let categories : (UserBudget.Category)[] =
-    //   row.type === 'INCOME' ?
-    //     budget.income.categories:
-    //     budget.expenses.categories;
-    
-    if(!(category_id in category_entries_by_id)){
-      category_entries_by_id[category_id] = []
-      unique_categories.push(category)
+    if(!(category_id in unique_type_category)){
+      unique_type_category[category_id] = new_category
     }
-    
     let entry: UserBudget.Entry = {entryId: row.entryId, name: row.name, amount: row.amount}
-    category_entries_by_id[category_id].push(entry)
+    let current_category : UserBudget.Category = unique_type_category[category_id]
+
+    current_category.total += entry.amount
+    current_category.entries.push(entry)
+    row.type === "EXPENSE" ? expense_total += entry.amount : income_total += entry.amount
   }
-  return budget
+
+  return {
+    budgetId: budgetId,
+    income: {
+      categories: Object.values(unique_income_categories),
+      total: income_total
+    },
+    expenses: {
+      categories: Object.values(unique_expense_categories),
+      total: expense_total
+    }
+  }
 }
 
