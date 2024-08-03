@@ -20,7 +20,6 @@ export async function userBudget(req: Request, res: Response){
   const budgetId: number = Number(req.params.budgetId)
 
   safeDBConnection(async(connection: mysql.Connection)=>{
-
     const authorise_error : ApiError | null = await authoriseUserToken(connection, token)
     if(authorise_error) return sendApiError(res, authorise_error)
 
