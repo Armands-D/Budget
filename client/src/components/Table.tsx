@@ -31,39 +31,40 @@ type section_data = {
 const section_row_class = 'section-row'
 const section_row_id= (type:string) => `${section_row_class}-${type.toLowerCase()}`
 
-function buildSection(name: string, section_data: section_data){
+function buildSection(type: string, section_data: section_data){
+  type = type.toLocaleLowerCase()
   return [
-  <tr
-  id={section_row_id(name)}
-  className={section_row_class}>
-    <th>{name.toLocaleUpperCase()}</th>
-  </tr>,
-  buildCategories(section_data.categories)
+    <tr
+    id={section_row_id(type)}
+    className={section_row_class}>
+      <th>{type.toLocaleUpperCase()}</th>
+    </tr>,
+    buildCategories(type, section_data.categories)
   ]
 }
 
 
-const category_row_class = 'category-row'
+const category_row_class = (type:string) => `category-row ${type}`
 const category_row_id = (id:number) => `${category_row_class}-${id}`
 const category_row_total_id = (id:number) => `${category_row_class}-${id}-total`
 
-function buildCategories(categories: (UserBudget.Category)[]){
+function buildCategories(type: string, categories: (UserBudget.Category)[]){
   let category: UserBudget.Category;
   let category_rows = []
   for(category of categories){
     let cat_row =
       <tr
       id={category_row_id(category.categoryId)}
-      className={category_row_class}>
+      className={category_row_class(type)}>
         <th>{category.name}</th>
       </tr>
-    let entries = buildEntries(category.entries)
+    let entries = buildEntries(type, category.entries)
     category_rows.push(cat_row)
     category_rows.push(entries)
     category_rows.push(
       <tr
       id={category_row_total_id(category.categoryId)}
-      className={category_row_class}>
+      className={category_row_class(type)}>
         <th>Total</th>
         <td>{category.total}</td>
       </tr>
@@ -72,10 +73,10 @@ function buildCategories(categories: (UserBudget.Category)[]){
   return [category_rows]
 }
 
-const entry_row_class: string = 'entry-row'
+const entry_row_class = (type: string) => `entry-row ${type}`
 const entry_row_id = (id:number) =>`${entry_row_class}-${id}`
 
-function buildEntries(entries: (UserBudget.Entry)[]){
+function buildEntries(type: string, entries: (UserBudget.Entry)[]){
   let entry: UserBudget.Entry
   let entry_rows = []
   for(entry of entries){
@@ -88,7 +89,7 @@ function buildEntries(entries: (UserBudget.Entry)[]){
     let entry_row =
       <tr
       id={entry_row_id(entry.entryId)}
-      className={entry_row_class}>
+      className={entry_row_class(type)}>
         {entry_data}
       </tr>
     
