@@ -3,15 +3,15 @@ import {UserBudget} from 'API/src/data_types/MainApi'
 import { Table } from './Table';
 
 function BudgetView(){
-  let userId : number = 1
-  let budgetId : number = 1
+  const userId : number = 1
+  const budgetId : number = 1
 
   const [budget, setBudget] = React.useState<UserBudget.Reponse | null>(null)
-  const [budgetUpdate, setBudgetUpdate] = React.useState<any>(true)
+  const [budgetUpdate, setBudgetUpdate] = React.useState<boolean>(true)
 
   React.useEffect(( ) => {
     let requestInProgress = true;
-    async function getData(){
+    async function getUserBudget(){
       fetch(`http://localhost:3001/user/${userId}/budget/${budgetId}`,{
         credentials: "include"
       })
@@ -19,17 +19,19 @@ function BudgetView(){
       .then( budget_response => {
         if(requestInProgress){
           setBudget(budget_response)
-          console.log('Get budget:', budget_response)
+          console.log('Budget Fetch:', budget_response)
         }
       })
     }
-    getData()
+    getUserBudget()
     return () => { requestInProgress = false }
 
-  },[userId, budgetId, budgetUpdate])
+  },[budgetUpdate])
+
+
   return <div>
       <Table budget={budget}/>
-      <button onClick={e => setBudgetUpdate(!budgetUpdate)}>CLICK</button>
+      {/* <button onClick={click}>CLICK</button> */}
     </div>
 }
 
