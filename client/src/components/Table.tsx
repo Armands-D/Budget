@@ -4,6 +4,11 @@ import React from 'react';
 import {ListingRows} from './ListingRows'
 import {UserBudget} from 'API/src/data_types/MainApi'
 
+const budget_table_class = 'budget-table'
+const budget_table_id = 'budget-table'
+const net_row_class = (type:string) => `net-row ${type}`
+const net_row_id = 'net-row'
+
 function Table (
   {budget}: {budget:UserBudget.Reponse | null}
 ){
@@ -12,15 +17,19 @@ function Table (
 
     
   return[ 
-  <div>
-    <table>
+    <table
+    id={budget_table_id}
+    className={budget_table_class}>
       <tbody>
         {buildSection('income', budget.income)}
         {buildSection('expenses', budget.expenses)}
-        <tr><th>Net:</th><td>{net}</td></tr>
+        <tr
+        id={net_row_id}
+        className={net_row_class(net <= 0 ? 'expenses' : 'income')}>
+          <th>Net:</th><td>{net}</td>
+        </tr>
       </tbody>
-    </table>
-  </div>]
+    </table>]
 }
 
 type section_data = {
@@ -28,15 +37,18 @@ type section_data = {
   total: number
 }
 
-const section_row_class = 'section-row'
-const section_row_id = (type:string) => `${section_row_class}-${type.toLowerCase()}`
+const section_row_class = (type: string) => `section-row ${type}`
+const section_row_id = (type:string) => `section-row-${type}`
 
 function buildSection(type: 'income'|'expenses', section_data: section_data){
   return [
     <tr
     id={section_row_id(type)}
-    className={section_row_class}>
-      <th>{type.toLocaleUpperCase()}</th>
+    className={section_row_class(type)}>
+      <th
+      colSpan={2}>
+        {type.toLocaleUpperCase()}
+      </th>
     </tr>,
     buildCategories(type, section_data.categories)
   ]
@@ -55,7 +67,10 @@ function buildCategories(type: string, categories: (UserBudget.Category)[]){
       <tr
       id={category_row_id(category.categoryId)}
       className={category_row_class(type)}>
-        <th>{category.name}</th>
+        <th
+        colSpan={2}>
+          {category.name}
+        </th>
       </tr>
     let entries = buildEntries(type, category.entries)
     category_rows.push(cat_row)

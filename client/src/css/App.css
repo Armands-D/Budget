@@ -58,3 +58,45 @@ table {
   */
   width: 6.25%;
 }
+
+.section-row.income{
+  background-color: #55AA00;
+}
+
+.section-row.expenses{
+  background-color: #c62f45;
+}
+
+.category-row.income{
+  font-weight: bold;
+  background-color: #8EEE91;
+}
+
+.category-row.expenses{
+  font-weight: bold;
+  background-color: #bd3e3e;
+}
+
+.entry-row.income{
+  background-color: #A8C3A9;
+}
+
+.entry-row.expenses{
+  background-color: #e27b86;
+}
+
+.net-row.income{
+  background-color: #55AA00;
+}
+
+.budget-table{
+  width: 50%;
+}
+
+th{
+  padding: 1%;
+}
+
+td{
+  padding: 0.5%;
+}
