@@ -29,10 +29,9 @@ type section_data = {
 }
 
 const section_row_class = 'section-row'
-const section_row_id= (type:string) => `${section_row_class}-${type.toLowerCase()}`
+const section_row_id = (type:string) => `${section_row_class}-${type.toLowerCase()}`
 
-function buildSection(type: string, section_data: section_data){
-  type = type.toLocaleLowerCase()
+function buildSection(type: 'income'|'expenses', section_data: section_data){
   return [
     <tr
     id={section_row_id(type)}
@@ -45,8 +44,8 @@ function buildSection(type: string, section_data: section_data){
 
 
 const category_row_class = (type:string) => `category-row ${type}`
-const category_row_id = (id:number) => `${category_row_class}-${id}`
-const category_row_total_id = (id:number) => `${category_row_class}-${id}-total`
+const category_row_id = (id:number) => `category-row-${id}`
+const category_row_total_id = (id:number) => `category-row-${id}-total`
 
 function buildCategories(type: string, categories: (UserBudget.Category)[]){
   let category: UserBudget.Category;
@@ -74,7 +73,7 @@ function buildCategories(type: string, categories: (UserBudget.Category)[]){
 }
 
 const entry_row_class = (type: string) => `entry-row ${type}`
-const entry_row_id = (id:number) =>`${entry_row_class}-${id}`
+const entry_row_id = (id:number) =>`entry-row-${id}`
 
 function buildEntries(type: string, entries: (UserBudget.Entry)[]){
   let entry: UserBudget.Entry
