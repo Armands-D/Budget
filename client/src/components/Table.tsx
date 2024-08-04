@@ -96,12 +96,16 @@ function buildEntries(type: string, entries: (UserBudget.Entry)[]){
   for(entry of entries){
 
     let entry_data = [
-      <td>{entry.name}</td>,
-      <td>{entry.amount}</td>
+      <td><div contentEditable>{entry.name}</div></td>,
+      <td><textarea contentEditable>{entry.amount}</textarea></td>
     ]
+
+    let entry_click = (e)=>{
+    }
 
     let entry_row =
       <tr
+      onClick={entry_click}
       id={entry_row_id(entry.entryId)}
       className={entry_row_class(type)}>
         {entry_data}
