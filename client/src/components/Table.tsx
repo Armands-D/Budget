@@ -54,15 +54,14 @@ function buildSection(type: 'income'|'expenses', section_data: section_data){
   ]
 }
 
-
 const category_row_class = (type:string) => `category-row ${type}`
 const category_row_id = (id:number) => `category-row-${id}`
 const category_row_total_id = (id:number) => `category-row-${id}-total`
 
 function buildCategories(type: string, categories: (UserBudget.Category)[]){
-  let category: UserBudget.Category;
   let category_rows = []
-  for(category of categories){
+  for(let index = 0; index < categories.length; index++){
+    let category: UserBudget.Category = categories[index]
     let cat_row =
       <tr
       id={category_row_id(category.categoryId)}
@@ -90,22 +89,20 @@ function buildCategories(type: string, categories: (UserBudget.Category)[]){
 const entry_row_class = (type: string) => `entry-row ${type}`
 const entry_row_id = (id:number) =>`entry-row-${id}`
 
+const update = (entry)=>{
+  alert(entry.name + " " + entry.amount)
+}
 function buildEntries(type: string, entries: (UserBudget.Entry)[]){
-  let entry: UserBudget.Entry
   let entry_rows = []
-  for(entry of entries){
-
+  for(let index : number = 0; index < entries.length; index++){
+    let entry: UserBudget.Entry = entries[index]
     let entry_data = [
-      <td><div contentEditable>{entry.name}</div></td>,
-      <td><textarea contentEditable>{entry.amount}</textarea></td>
+      <td><div onBlur={e => update(entry)} contentEditable>{entry.name}</div></td>,
+      <td><div contentEditable>{entry.amount}</div></td>
     ]
-
-    let entry_click = (e)=>{
-    }
 
     let entry_row =
       <tr
-      onClick={entry_click}
       id={entry_row_id(entry.entryId)}
       className={entry_row_class(type)}>
         {entry_data}
