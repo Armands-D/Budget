@@ -1,5 +1,6 @@
 // React
-import React from 'react';
+import React, { useRef, createRef} from 'react';
+
 // Components
 import {ListingRows} from './ListingRows'
 import {UserBudget} from 'API/src/data_types/MainApi'
@@ -71,7 +72,7 @@ function buildCategories(type: string, categories: (UserBudget.Category)[]){
           {category.name}
         </th>
       </tr>
-    let entries = buildEntries(type, category.entries)
+    let entries = BuildEntries(type, category.entries)
     category_rows.push(cat_row)
     category_rows.push(entries)
     category_rows.push(
@@ -89,20 +90,27 @@ function buildCategories(type: string, categories: (UserBudget.Category)[]){
 const entry_row_class = (type: string) => `entry-row ${type}`
 const entry_row_id = (id:number) =>`entry-row-${id}`
 
-const update = (entry)=>{
-  alert(entry.name + " " + entry.amount)
+const update = (entry: UserBudget.Entry, ref: React.RefObject<HTMLDivElement>)=>{
+  console.log(ref.current.innerHTML)
 }
-function buildEntries(type: string, entries: (UserBudget.Entry)[]){
+
+function BuildEntries(type: string, entries: (UserBudget.Entry)[]){
   let entry_rows = []
+  let entry_name_refs = useRef<React.RefObject<HTMLDivElement>[]>([])
+  entry_name_refs.current = entries.map((_, i) => entry_name_refs.current[i] ? entry_name_refs.current[i] : createRef<React.RefObject<HTMLDivElement>>())
+  let entry_value_refs = []
+
   for(let index : number = 0; index < entries.length; index++){
     let entry: UserBudget.Entry = entries[index]
+    // let entry_value_ref = useRef(null)
     let entry_data = [
-      <td><div onBlur={e => update(entry)} contentEditable>{entry.name}</div></td>,
+      <td><div ref={entry_name_refs.current[index]} contentEditable>{entry.name}</div></td>,
       <td><div contentEditable>{entry.amount}</div></td>
     ]
 
     let entry_row =
       <tr
+      onBlur={e => update(entry, entry_name_refs.current[index])}
       id={entry_row_id(entry.entryId)}
       className={entry_row_class(type)}>
         {entry_data}
