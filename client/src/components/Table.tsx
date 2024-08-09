@@ -17,20 +17,20 @@ function Table (
   let net : number = budget.income.total - budget.expenses.total
 
     
-  return[ 
-    <table
+  return (
+  <table
     id={budget_table_id}
     className={budget_table_class}>
-      <tbody>
-        {buildSection('income', budget.income)}
-        {buildSection('expenses', budget.expenses)}
-        <tr
-        id={net_row_id}
-        className={net_row_class(net <= 0 ? 'expenses' : 'income')}>
-          <th>Net:</th><td>{net}</td>
-        </tr>
-      </tbody>
-    </table>]
+    <tbody>
+      {buildSection('income', budget.income)}
+      {buildSection('expenses', budget.expenses)}
+      <tr
+      id={net_row_id}
+      className={net_row_class(net <= 0 ? 'expenses' : 'income')}>
+        <th>Net:</th><td>{net}</td>
+      </tr>
+    </tbody>
+  </table>) 
 }
 
 type section_data = {
@@ -91,13 +91,13 @@ const entry_row_class = (type: string) => `entry-row ${type}`
 const entry_row_id = (id:number) =>`entry-row-${id}`
 
 const update = (entry: UserBudget.Entry, ref: React.RefObject<HTMLDivElement>)=>{
-  console.log(ref.current.innerHTML)
+  console.log(ref.current?.innerHTML)
 }
 
 function BuildEntries(type: string, entries: (UserBudget.Entry)[]){
   let entry_rows = []
   let entry_name_refs = useRef<React.RefObject<HTMLDivElement>[]>([])
-  entry_name_refs.current = entries.map((_, i) => entry_name_refs.current[i] ? entry_name_refs.current[i] : createRef<React.RefObject<HTMLDivElement>>())
+  entry_name_refs.current = entries.map((_, i) => entry_name_refs.current[i] ?? createRef<React.RefObject<HTMLDivElement>>())
   let entry_value_refs = []
 
   for(let index : number = 0; index < entries.length; index++){
