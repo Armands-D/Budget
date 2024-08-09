@@ -1,9 +1,9 @@
 import React from 'react';
 import './css/App.css';
 // Components
-import {Table} from './components/Table'
+import {Table} from './components/BudgetView/Table'
 import {Login} from './components/Login'
-import { BudgetView } from './components/BudgetView';
+import { BudgetView } from './components/BudgetView/BudgetView';
 
 function App() {
   const [loggedIn, setLoggedIn] = React.useState(false)
