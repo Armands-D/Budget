@@ -85,7 +85,7 @@ function BuildCategories(props: {type: string, categories: (UserBudget.Category)
       </tr>
     category_rows.push(cat_row)
     category_rows.push(
-      <BuildStatefulEntries
+      <BuildEntries
       type={type}
       entries={category.entries}
       />)
@@ -101,14 +101,7 @@ function BuildCategories(props: {type: string, categories: (UserBudget.Category)
   return <>{category_rows}</>
 }
 
-const entry_row_class = (type: string) => `entry-row ${type}`
-const entry_row_id = (id:number) =>`entry-row-${id}`
-
-const update = (entry: UserBudget.Entry, ref1: React.RefObject<HTMLDivElement>,ref2: React.RefObject<HTMLDivElement>)=>{
-  console.log(ref1.current?.innerHTML, ref2.current?.innerHTML)
-}
-
-function BuildStatefulEntries(props: {type: string, entries: (UserBudget.Entry)[]}){
+function BuildEntries(props: {type: string, entries: (UserBudget.Entry)[]}){
   let entry_rows = []
   for(let index : number = 0; index < props.entries.length; index++){
     entry_rows.push(
@@ -120,19 +113,31 @@ function BuildStatefulEntries(props: {type: string, entries: (UserBudget.Entry)[
   return <>{entry_rows}</>
 }
 
+const entry_row_class = (type: string) => `entry-row ${type}`
+const entry_row_id = (id:number) =>`entry-row-${id}`
+const entry_row_data_id = (type: 'name' | 'amount', id:number) => `entry-row-data-${type}-${id}`
+const entry_row_input_id = (type: 'name' | 'amount', id:number) => `entry-row-input-${type}-${id}`
 function EntryRow(props: {type: string, entry: UserBudget.Entry}){
   const [entry, setEntry] = useState(props.entry)
-  let entry_data = <>
-    <td>
+  let entry_row_data = <>
+    <td
+    id={entry_row_data_id('name', entry.entryId)}
+    >
       <input
+      type='text'
       onInput={e=>setEntry({...entry, name: e.currentTarget.value})}
       defaultValue={entry.name}
+      id={entry_row_input_id('name', entry.entryId)}
       />
     </td>
-    <td>
+    <td
+    id={entry_row_data_id('amount', entry.entryId)}
+    >
       <input
+      type='number'
       onInput={e=>setEntry({...entry, amount: Number(e.currentTarget.value)})}
       defaultValue={entry.amount}
+      id={entry_row_input_id('amount', entry.entryId)}
       />
     </td>
   </>
@@ -142,40 +147,9 @@ function EntryRow(props: {type: string, entry: UserBudget.Entry}){
     onBlur={e=>console.log("Sending Entry Data To DB ", entry)}
     id={entry_row_id(entry.entryId)}
     className={entry_row_class(props.type)}>
-      {entry_data}
+      {entry_row_data}
     </tr>
   </>
-}
-
-function BuildEntries(type: string, entries: (UserBudget.Entry)[]){
-
-  let entry_name_refs = useRef<React.RefObject<HTMLDivElement>[]>([])
-  entry_name_refs.current = entries.map((_, i) =>
-    entry_name_refs.current[i] ?? createRef<React.RefObject<HTMLDivElement>>())
-
-  let entry_value_refs = useRef<React.RefObject<HTMLDivElement>[]>([])
-  entry_value_refs.current = entries.map((_, i) =>
-    entry_value_refs.current[i] ?? createRef<React.RefObject<HTMLDivElement>>())
-
-  let entry_rows = []
-  for(let index : number = 0; index < entries.length; index++){
-    let entry: UserBudget.Entry = entries[index]
-    let entry_data = [
-      <td><div ref={entry_name_refs.current[index]} contentEditable>{entry.name}</div></td>,
-      <td><div ref={entry_value_refs.current[index]} contentEditable>{entry.amount}</div></td>
-    ]
-
-    let entry_row =
-      <tr
-      onBlur={e => update(entry, entry_name_refs.current[index], entry_value_refs.current[index])}
-      id={entry_row_id(entry.entryId)}
-      className={entry_row_class(type)}>
-        {entry_data}
-      </tr>
-    
-    entry_rows.push(entry_row)
-  }
-  return [entry_rows]
 }
 
 export {Table}
