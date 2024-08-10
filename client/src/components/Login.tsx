@@ -24,11 +24,26 @@ function Login({toggleLogin}: {toggleLogin: () => void}){
     }
 
     return <div>
-      <label htmlFor="email">Email:</label>
-      <input type="text" id="email"/>
-      <label htmlFor="password">Password:</label>
-      <input type="password" id="password"/>
-      <button onClick={handleLogin}>Login</button>
+      <label 
+      htmlFor="email">
+        Email:
+      </label>
+      <input
+      defaultValue={"a.d@g.com"}
+      type="text"
+      id="email"/>
+      <label
+      htmlFor="password">
+        Password:
+      </label>
+      <input
+      defaultValue={"armands"}
+      type="password"
+      id="password"/>
+      <button
+      onClick={handleLogin}>
+        Login
+      </button>
     </div>
 }
 

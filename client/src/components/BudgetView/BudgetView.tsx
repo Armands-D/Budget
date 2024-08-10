@@ -30,7 +30,7 @@ function BudgetView(){
 
 
   return <div>
-      <Table budget={budget}/>
+      <Table budget={budget} b={budgetUpdate}/>
       <button onClick={()=>setBudgetUpdate(!budgetUpdate)}>CLICK</button>
     </div>
 }

@@ -1,5 +1,5 @@
 // React
-import React, { useRef, createRef} from 'react';
+import React, { useState, useRef, createRef, useEffect, useCallback} from 'react';
 
 // Components
 import {ListingRows} from '../ListingRows'
@@ -11,7 +11,7 @@ const net_row_class = (type:string) => `net-row ${type}`
 const net_row_id = 'net-row'
 
 function Table (
-  {budget}: {budget:UserBudget.Reponse | null}
+  {budget}: {budget:UserBudget.Reponse | null, b: boolean}
 ) : JSX.Element
 {
   if(!budget) return <div></div>
@@ -27,7 +27,7 @@ function Table (
       section_data={budget.income}
       />
       <BuildSection
-      type='income'
+      type='expenses'
       section_data={budget.expenses}
       />
       <tr
@@ -109,11 +109,43 @@ const update = (entry: UserBudget.Entry, ref1: React.RefObject<HTMLDivElement>,r
 }
 
 function BuildStatefulEntries(props: {type: string, entries: (UserBudget.Entry)[]}){
-  return <></>
+  let entry_rows = []
+  for(let index : number = 0; index < props.entries.length; index++){
+    entry_rows.push(
+      <EntryRow
+      type={props.type}
+      entry={props.entries[index]}
+      />)
+  }
+  return <>{entry_rows}</>
 }
 
-function EntryData(){}
-function EntryRow(){}
+function EntryRow(props: {type: string, entry: UserBudget.Entry}){
+  const [entry, setEntry] = useState(props.entry)
+  let entry_data = <>
+    <td>
+      <input
+      onInput={e=>setEntry({...entry, name: e.currentTarget.value})}
+      defaultValue={entry.name}
+      />
+    </td>
+    <td>
+      <input
+      onInput={e=>setEntry({...entry, amount: Number(e.currentTarget.value)})}
+      defaultValue={entry.amount}
+      />
+    </td>
+  </>
+
+  return <>
+    <tr
+    onBlur={e=>console.log("Sending Entry Data To DB ", entry)}
+    id={entry_row_id(entry.entryId)}
+    className={entry_row_class(props.type)}>
+      {entry_data}
+    </tr>
+  </>
+}
 
 function BuildEntries(type: string, entries: (UserBudget.Entry)[]){
 
