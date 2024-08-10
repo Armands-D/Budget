@@ -1,5 +1,5 @@
 // React
-import React, { useState, useRef, createRef, useEffect, useCallback} from 'react';
+import React, { Fragment, useState, useRef, createRef, useEffect, useCallback} from 'react';
 
 // Components
 import {ListingRows} from '../ListingRows'
@@ -74,41 +74,60 @@ function BuildCategories(props: {type: string, categories: (UserBudget.Category)
   let category_rows = []
   for(let index = 0; index < categories.length; index++){
     let category: UserBudget.Category = categories[index]
-    let cat_row =
-      <tr
-      id={category_row_id(category.categoryId)}
-      className={category_row_class(type)}>
-        <th
-        colSpan={2}>
-          {category.name}
-        </th>
-      </tr>
-    category_rows.push(cat_row)
     category_rows.push(
-      <BuildEntries
-      type={type}
-      entries={category.entries}
-      />)
-    category_rows.push(
-      <tr
-      id={category_row_total_id(category.categoryId)}
-      className={category_row_class(type)}>
-        <th>Total</th>
-        <td>{category.total}</td>
-      </tr>
-    )
+      <Fragment key={`frag-${category_row_id(category.categoryId)}`}>
+        <BuildCategory
+        type={type}
+        category={category}
+        />
+      </Fragment>)
   }
   return <>{category_rows}</>
 }
 
-function BuildEntries(props: {type: string, entries: (UserBudget.Entry)[]}){
+function BuildCategory(props: {type: string, category: UserBudget.Category}){
+  let {type, category} = props
+  let cat_heading =
+    <tr
+    id={category_row_id(category.categoryId)}
+    className={category_row_class(type)}>
+      <th
+      colSpan={2}>
+        {category.name}
+      </th>
+    </tr>
+
+  let cat_entries = <BuildCategoryEntries
+    type={type}
+    category={category}
+  />
+
+  let cat_total = <tr
+    id={category_row_total_id(category.categoryId)}
+    className={category_row_class(type)}>
+      <th>Total</th>
+      <td>{category.total}</td>
+  </tr>
+
+  return <>
+    {cat_heading}
+    {cat_entries}
+    {cat_total}
+  </>
+
+}
+
+function BuildCategoryEntries(props: {type: string, category: UserBudget.Category}){
   let entry_rows = []
-  for(let index : number = 0; index < props.entries.length; index++){
+  let entries : UserBudget.Entry[] = props.category.entries
+  for(let index : number = 0; index < entries.length; index++){
     entry_rows.push(
-      <EntryRow
-      type={props.type}
-      entry={props.entries[index]}
-      />)
+      <Fragment key={`frag-cat-${props.category.categoryId}-${entry_row_id(entries[index].entryId)}`}>
+        <EntryRow
+        type={props.type}
+        entry={entries[index]}
+        />
+      </Fragment>)
   }
   return <>{entry_rows}</>
 }
