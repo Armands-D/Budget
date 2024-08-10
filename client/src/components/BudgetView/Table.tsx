@@ -22,19 +22,23 @@ function Table (
     id={budget_table_id}
     className={budget_table_class}>
     <tbody>
+
       <BuildSection
       type='income'
       section_data={budget.income}
       />
+
       <BuildSection
       type='expenses'
       section_data={budget.expenses}
       />
+
       <tr
       id={net_row_id}
       className={net_row_class(net <= 0 ? 'expenses' : 'income')}>
         <th>Net:</th><td>{net}</td>
       </tr>
+
     </tbody>
   </table>) 
 }
@@ -46,10 +50,9 @@ type section_data = {
 
 const section_row_class = (type: string) => `section-row ${type}`
 const section_row_id = (type:string) => `section-row-${type}`
-
-function BuildSection(props: {type: 'income'|'expenses', section_data: section_data}){
-  return <>
-    <tr
+type SectionType= 'income' | 'expenses'
+function BuildSection(props: {type: SectionType, section_data: section_data}){
+  let section_heading = <tr
     id={section_row_id(props.type)}
     className={section_row_class(props.type)}>
       <th
@@ -57,6 +60,9 @@ function BuildSection(props: {type: 'income'|'expenses', section_data: section_d
         {props.type.toLocaleUpperCase()}
       </th>
     </tr>
+  
+  return <>
+    {section_heading}
     <BuildCategories
     type={props.type}
     categories={props.section_data.categories}
@@ -67,10 +73,8 @@ function BuildSection(props: {type: 'income'|'expenses', section_data: section_d
 const category_row_class = (type:string) => `category-row ${type}`
 const category_row_id = (id:number) => `category-row-${id}`
 const category_row_total_id = (id:number) => `category-row-${id}-total`
-
-function BuildCategories(props: {type: string, categories: (UserBudget.Category)[]}){
+function BuildCategories(props: {type: SectionType, categories: (UserBudget.Category)[]}){
   let {type, categories} = props
-
   let category_rows = []
   for(let index = 0; index < categories.length; index++){
     let category: UserBudget.Category = categories[index]
@@ -85,7 +89,7 @@ function BuildCategories(props: {type: string, categories: (UserBudget.Category)
   return <>{category_rows}</>
 }
 
-function BuildCategory(props: {type: string, category: UserBudget.Category}){
+function BuildCategory(props: {type: SectionType, category: UserBudget.Category}){
   let {type, category} = props
   let cat_heading =
     <tr
@@ -117,7 +121,7 @@ function BuildCategory(props: {type: string, category: UserBudget.Category}){
 
 }
 
-function BuildCategoryEntries(props: {type: string, category: UserBudget.Category}){
+function BuildCategoryEntries(props: {type: SectionType, category: UserBudget.Category}){
   let entry_rows = []
   let entries : UserBudget.Entry[] = props.category.entries
   for(let index : number = 0; index < entries.length; index++){
@@ -136,7 +140,7 @@ const entry_row_class = (type: string) => `entry-row ${type}`
 const entry_row_id = (id:number) =>`entry-row-${id}`
 const entry_row_data_id = (type: 'name' | 'amount', id:number) => `entry-row-data-${type}-${id}`
 const entry_row_input_id = (type: 'name' | 'amount', id:number) => `entry-row-input-${type}-${id}`
-function EntryRow(props: {type: string, entry: UserBudget.Entry}){
+function EntryRow(props: {type: SectionType, entry: UserBudget.Entry}){
   const [entry, setEntry] = useState(props.entry)
   let entry_row_data = <>
     <td
