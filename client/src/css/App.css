@@ -1,0 +1,103 @@
+.App {
+  text-align: center;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+table {
+  table-layout: fixed;
+  /* width: 100%; */
+}
+
+.example {
+  /* text-orientation: sideways; */
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  background-color: blue;
+  /* 
+    Width needs be set as a specific length, (as far I can tell, this is a bug)
+    fit-content sets the width to 0, and through unexpected behaviour fixes itself
+    - Sometimes refreshing components
+    - Disabling & enabling width property or other properties
+    - Changing other component's properties
+    - Or simply moving to a different window
+    Might be React related, as seemed to work in native HTML sandbox,
+  */
+  width: 6.25%;
+}
+
+.section-row.income{
+  background-color: #55AA00;
+}
+
+.section-row.expenses{
+  background-color: #c62f45;
+}
+
+.category-row.income{
+  font-weight: bold;
+  background-color: #8EEE91;
+}
+
+.category-row.expenses{
+  font-weight: bold;
+  background-color: #bd3e3e;
+}
+
+.entry-row.income{
+  background-color: #A8C3A9;
+}
+
+.entry-row.expenses{
+  background-color: #e27b86;
+}
+
+.net-row.income{
+  background-color: #55AA00;
+}
+
+.budget-table{
+  width: 50%;
+}
+
+th{
+  padding: 1%;
+}
+
+td{
+  padding: 0.5%;
+}
