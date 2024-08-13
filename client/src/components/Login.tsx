@@ -23,8 +23,9 @@ function Login({toggleLogin}: {toggleLogin: () => void}){
       })
     }
 
-    return <div>
+    return <div id='login'>
       <label 
+      id='labal1'
       htmlFor="email">
         Email:
       </label>
@@ -33,6 +34,7 @@ function Login({toggleLogin}: {toggleLogin: () => void}){
       type="text"
       id="email"/>
       <label
+      id='lbl2'
       htmlFor="password">
         Password:
       </label>
@@ -41,6 +43,7 @@ function Login({toggleLogin}: {toggleLogin: () => void}){
       type="password"
       id="password"/>
       <button
+      id='butloggy'
       onClick={handleLogin}>
         Login
       </button>

@@ -14,9 +14,9 @@ function App() {
   }
 
   return (
-    <div className="App">
+    <div id='Appy' className="App">
       {!loggedIn && <Login toggleLogin={toggleLogin}/>}
-      {loggedIn && [<BudgetView/>, <button onClick={toggleLogin}>Logout</button>]}
+      {loggedIn && <><BudgetView/><button onClick={toggleLogin}>Logout</button></>}
     </div>
   );
 }

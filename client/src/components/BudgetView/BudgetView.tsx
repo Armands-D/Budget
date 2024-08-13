@@ -29,9 +29,9 @@ function BudgetView(){
   },[budgetUpdate])
 
 
-  return <div>
+  return <div id='budget'>
       <Table budget={budget} b={budgetUpdate}/>
-      <button onClick={()=>setBudgetUpdate(!budgetUpdate)}>CLICK</button>
+      <button id='clickbutton' onClick={()=>setBudgetUpdate(!budgetUpdate)}>CLICK</button>
     </div>
 }
 
