@@ -1,5 +1,5 @@
 import React from 'react';
-import {UserBudget} from 'API/src/data_types/MainApi'
+import {UserBudget} from '../../api_interfaces/MainApi'
 import { Table } from './Table';
 
 function BudgetView(){

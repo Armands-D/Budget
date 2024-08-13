@@ -11,7 +11,7 @@ export const missing_authorization_error : ApiError = {
 }
 
 export namespace Database{
-  export let error_db_connect: ApiError = {
+  export const error_db_connect: ApiError = {
     error: 'Critical Server Error',
     status: 500,
     message: 'Failed to Connect to DB'
@@ -78,7 +78,7 @@ export namespace Login {
     error: "Multiple Login Users By Email"
   }
 
-  export  let error_body : ApiError = {
+  export const error_body : ApiError = {
     error: "Client Error",
     status: 401, 
     message: "Body requires password and email."
