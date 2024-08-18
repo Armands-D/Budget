@@ -1,7 +1,6 @@
 import React from 'react';
 import './css/App.css';
 // Components
-import {Table} from './components/BudgetView/Table'
 import {Login} from './components/Login'
 import { BudgetView } from './components/BudgetView/BudgetView';
 

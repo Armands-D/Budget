@@ -1,11 +1,14 @@
 
 import React, { Fragment, useState, useRef, createRef, useEffect, useCallback} from 'react';
 import {CategoryEntries} from './Entries'
-import {UserBudget} from 'API/MainApi'
+import {UserBudget} from '../../api_interfaces/MainApi'
 
-const category_row_class = (type:string) => `category-row ${type}`
-const category_row_id = (id:number) => `category-row-${id}`
-const category_row_total_id = (id:number) => `category-row-${id}-total`
+const category_row_class = (type:UserBudget.SectionType) => 
+  `category-row ${type}`
+const category_row_id = (id:number) => 
+  `category-row-${id}`
+const category_row_total_id = (id:number) =>
+  `category-row-${id}-total`
 
 function Categories(props: {type: UserBudget.SectionType, categories: (UserBudget.Category)[]}){
   let {type, categories} = props

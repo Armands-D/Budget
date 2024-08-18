@@ -11,7 +11,7 @@ const net_row_class = (type:string) => `net-row ${type}`
 const net_row_id = 'net-row'
 
 function Table (
-  {budget}: {budget:UserBudget.Reponse | null, b: boolean}
+  {budget}: {budget:UserBudget.Reponse | null }
 ) : JSX.Element
 {
   if(!budget) return <div></div>
@@ -50,7 +50,6 @@ type section_data = {
 
 const section_row_class = (type: string) => `section-row ${type}`
 const section_row_id = (type:string) => `section-row-${type}`
-type SectionType= 'income' | 'expenses'
 function BuildSection(props: {type: UserBudget.SectionType, section_data: section_data}){
   let section_heading = <tr
     id={section_row_id(props.type)}
