@@ -1,5 +1,5 @@
 // React
-import React, { Fragment, useState, useRef, createRef, useEffect, useCallback} from 'react';
+import React, {} from 'react';
 
 // Components
 import {Categories} from './Categories'

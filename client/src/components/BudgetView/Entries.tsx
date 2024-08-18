@@ -1,6 +1,6 @@
 
 import React, { Fragment, useState, useRef, createRef, useEffect, useCallback} from 'react';
-import {UserBudget} from '../../api_interfaces/MainApi'
+import {UserBudget} from 'API/MainApi'
 
 function CategoryEntries(props: {type: UserBudget.SectionType, category: UserBudget.Category}){
   let entry_rows = []

@@ -1,7 +1,7 @@
 
 import React, { Fragment, useState, useRef, createRef, useEffect, useCallback} from 'react';
 import {CategoryEntries} from './Entries'
-import {UserBudget} from '../../api_interfaces/MainApi'
+import {UserBudget} from 'API/MainApi'
 
 const category_row_class = (type:string) => `category-row ${type}`
 const category_row_id = (id:number) => `category-row-${id}`

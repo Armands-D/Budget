@@ -6,7 +6,7 @@ function BudgetView(){
   const userId : number = 1
   const budgetId : number = 1
 
-  const [budget, setBudget] = React.useState<UserBudget.Reponse | null>(null)
+  const [budget, setBudget] = React.useState<UserBudget.Reponse| null>(null)
   const [budgetUpdate, setBudgetUpdate] = React.useState<boolean>(true)
 
   React.useEffect(( ) => {
