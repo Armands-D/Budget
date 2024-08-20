@@ -1,6 +1,7 @@
 
 import React, { Fragment, useState }from 'react';
 import {UserBudget} from '../../api_interfaces/MainApi'
+import userEvent from '@testing-library/user-event';
 
 namespace IDs {
   export const entry_row_class = (type: UserBudget.Entry['name' | 'amount'])=>
@@ -32,16 +33,18 @@ function EntryRow(props: {type: UserBudget.SectionType, entry: UserBudget.Entry}
   const {type} = props
   const [entry, setEntry] = useState<UserBudget.Entry>(props.entry)
   const [entryUpdateTimer, setEntryUpdateTimer] = useState<NodeJS.Timeout>()
+  const [entryUpdatedByTimer, setEntryUpdatedByTimer] = useState<boolean>(false)
   const entry_row_id = IDs.entry_row_id(entry.entryId)
 
   function startEntryUpdateTimer({name = entry.name, amount = entry.amount}){
     setEntry({...entry, name: name, amount: amount})
-    clearInterval(entryUpdateTimer)
+    clearTimeout(entryUpdateTimer)
+    setEntryUpdatedByTimer(false)
     setEntryUpdateTimer(
-      setInterval(() => {
+      setTimeout(() => {
         console.log(entry_row_id, 'EntryUpdateTimer', entry)
         updateEntryDB(entry)
-        clearInterval(entryUpdateTimer)
+        setEntryUpdatedByTimer(true)
       }, 2000)
     )
   }
@@ -76,7 +79,8 @@ function EntryRow(props: {type: UserBudget.SectionType, entry: UserBudget.Entry}
   return <>
     <tr
     onBlur={ _ => {
-      clearInterval(entryUpdateTimer)
+      clearTimeout(entryUpdateTimer)
+      if(entryUpdatedByTimer) return
       console.log(entry_row_id, 'EntryRowOnBlur',entry)
       updateEntryDB(entry)
     }}
