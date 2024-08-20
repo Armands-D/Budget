@@ -32,28 +32,58 @@ function CategoryEntries(props: {type: UserBudget.SectionType, category: UserBud
 function EntryRow(props: {type: UserBudget.SectionType, entry: UserBudget.Entry}){
   const {type} = props
   const [entry, setEntry] = useState<UserBudget.Entry>(props.entry)
-  const [entryUpdateTimer, setEntryUpdateTimer] = useState<NodeJS.Timeout>()
+  const [entryDataUpdateTimer, setEntryUpdateTimer] = useState<NodeJS.Timeout>()
   const [entryUpdatedByTimer, setEntryUpdatedByTimer] = useState<boolean>(false)
   const entry_row_id = IDs.entry_row_id(entry.entryId)
 
-  function startEntryUpdateTimer({name = entry.name, amount = entry.amount}){
-    setEntry({...entry, name: name, amount: amount})
-    clearTimeout(entryUpdateTimer)
-    setEntryUpdatedByTimer(false)
-    setEntryUpdateTimer(
-      setTimeout(() => {
-        console.log(entry_row_id, 'EntryUpdateTimer', entry)
-        updateEntryDB(entry)
-        setEntryUpdatedByTimer(true)
-      }, 2000)
-    )
-  }
 
-  function updateEntryDB(entry: UserBudget.Entry){
-    console.log('Updating DB Entry', entry)
-  }
+  let entry_row_data = EntryRowData({
+    entryState : {entry, setEntry},
+    updateTimerState: {
+      updateTimer: entryDataUpdateTimer,
+      setUpdateTimer: setEntryUpdateTimer
+    },
+    updateStatusState:{
+      updateStatus: entryUpdatedByTimer,
+      setUpdateStatus: setEntryUpdatedByTimer
+    }
+  })
 
-  let entry_row_data = <>
+  return <>
+    <tr
+    onBlur={ _ => {
+      clearTimeout(entryDataUpdateTimer)
+      if(entryUpdatedByTimer) return
+      console.log(entry_row_id, 'EntryRowOnBlur',entry)
+      updateEntryDB(entry)
+    }}
+    id={entry_row_id}
+    className={'entry'}>
+      {entry_row_data}
+    </tr>
+  </>
+}
+
+function EntryRowData(props: {
+  entryState: {
+    entry: UserBudget.Entry,
+    setEntry: (entry: UserBudget.Entry)=>void
+  },
+  updateTimerState : {
+    updateTimer: NodeJS.Timeout | undefined,
+    setUpdateTimer: (timer: NodeJS.Timeout | undefined)=>void
+  }
+  updateStatusState:{
+    updateStatus: boolean,
+    setUpdateStatus: (status: boolean)=>void
+  }
+}){
+
+  const {entry, setEntry} = props.entryState
+  const {updateTimer, setUpdateTimer} = props.updateTimerState
+  const {updateStatus, setUpdateStatus} = props.updateStatusState
+
+  let entry_name_field =<>
     <td
     id={IDs.entry_row_data_id('name', entry.entryId)}
     >
@@ -64,11 +94,14 @@ function EntryRow(props: {type: UserBudget.SectionType, entry: UserBudget.Entry}
       id={IDs.entry_row_input_id('name', entry.entryId)}
       />
     </td>
+  </>
+
+  let entry_amount_field = <>
     <td
     id={IDs.entry_row_data_id('amount', entry.entryId)}
     >
       <input
-      type='number'
+      type='text'
       onInput={(e) => {startEntryUpdateTimer({amount: Number(e.currentTarget.value)})}}
       defaultValue={entry.amount}
       id={IDs.entry_row_input_id('amount', entry.entryId)}
@@ -76,19 +109,27 @@ function EntryRow(props: {type: UserBudget.SectionType, entry: UserBudget.Entry}
     </td>
   </>
 
-  return <>
-    <tr
-    onBlur={ _ => {
-      clearTimeout(entryUpdateTimer)
-      if(entryUpdatedByTimer) return
-      console.log(entry_row_id, 'EntryRowOnBlur',entry)
-      updateEntryDB(entry)
-    }}
-    id={entry_row_id}
-    className={'entry'}>
-      {entry_row_data}
-    </tr>
-  </>
+  return <>{entry_name_field}{entry_amount_field}</>
+
+  function startEntryUpdateTimer({
+    name = entry.name,
+    amount = entry.amount
+  }){
+    setEntry({...entry, name, amount})
+    clearTimeout(updateTimer)
+    setUpdateStatus(false)
+    setUpdateTimer(
+      setTimeout(() => {
+        console.log(IDs.entry_row_id(entry.entryId), 'EntryUpdateTimer', entry)
+        updateEntryDB(entry)
+        setUpdateStatus(true)
+      }, 2000)
+    )
+  }
+}
+
+function updateEntryDB(entry: UserBudget.Entry){
+  console.log('Updating DB Entry', entry)
 }
 
 export {CategoryEntries, IDs}
