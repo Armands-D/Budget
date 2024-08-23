@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Learned Things/Project.md",
+                "file": "Learned Things/MySQL.md",
                 "mode": "source",
                 "backlinks": true,
                 "source": false
@@ -86,7 +86,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Learned Things/Project.md",
+                "file": "Learned Things/MySQL.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +103,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Learned Things/Project.md",
+                "file": "Learned Things/MySQL.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -126,7 +126,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Learned Things/Project.md"
+                "file": "Learned Things/MySQL.md"
               }
             }
           }
@@ -149,9 +149,9 @@
   },
   "active": "f770321e399e1be0",
   "lastOpenFiles": [
+    "Learned Things/Project.md",
     "Learned Things/MySQL.md",
     "Learned Things/npm.md",
-    "Learned Things/Project.md",
     "Welcome.md",
     "Learned Things/images/Pasted image 20240721224716.png",
     "Learned Things/images",
