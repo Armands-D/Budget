@@ -3,3 +3,6 @@ export {POST}
 
 import * as GET from './GET/GET'
 export {GET}
+
+import * as PUT from './PUT/PUT'
+export {PUT}

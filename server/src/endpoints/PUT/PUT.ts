@@ -1,0 +1,1 @@
+export {entryUpdate} from './EntryUpdate' 

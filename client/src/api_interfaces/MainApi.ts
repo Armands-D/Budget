@@ -93,3 +93,11 @@ export namespace Login {
     token: string
   }
 }
+
+export namespace EntryUpdate {
+  export const body_validation_error : ApiError = {
+    error: "Body Validation",
+    status: 400,
+    message: "Body requires a name and amount value"
+  }
+}
