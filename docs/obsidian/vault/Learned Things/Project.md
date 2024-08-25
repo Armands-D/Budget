@@ -117,3 +117,11 @@ app.post('/login', async (req, res) => {
 
 # Base64
 The encoding is stored in 6 bit increments, meaning that some encoded strings can be padded with 0s, resulting in a repeated '=' pattern. Meaning the '=' padding can be removed and still decode to the same string. Found this out when I was testing token authentication and was confused why removing characters resulted in the same decoding.
+
+# RegEx (Javascript)
+The `\`s are being swallowed by the string literal.
+You should use a regex literal instead:
+```javascript
+var reg = /^[(]?[2-9]\d{2}[)]?[\-. :]?[2-9]\d{2}[\-. :]?\d{4}$/;
+```
+Using string literals for regex means you have to escape `\` twice, once for JS engine, once for RegEx parse. Using regex literal avoids this.

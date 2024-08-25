@@ -100,4 +100,16 @@ export namespace EntryUpdate {
     status: 400,
     message: "Body requires a name and amount value"
   }
+
+  export const entry_validation_error : ApiError = {
+    error: "Entry Validation",
+    status: 400,
+    message: "Entry validation failed."
+  }
+
+  export const uri_param_error: ApiError = {
+    error: "URI Param Validation",
+    status: 400,
+    message: "URI param must be a number"
+  }
 }

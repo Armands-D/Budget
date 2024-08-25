@@ -28,15 +28,21 @@ export function Logger(caller: string){
 }
 
 export async function safeDBConnection(
-  fun: (connection: mysql.Connection) => Promise<void>
-){
+  fun: (connection: mysql.Connection) => Promise<any>,
+): Promise<[result: any, error: null | ApiError]>
+{
+  const exception : ApiError = {
+    error: "Server Error",
+    status: 500,
+    message: "Critical Internal Server Error"
+  }
   try{
-    return DatabaseConnection()
-    .then((connection: mysql.Connection) =>
-      fun(connection).then(() => connection.end())
-    )
+    var connection :mysql.Connection = await DatabaseConnection()
+    var result: any= await fun(connection)
+    connection.end()
+    return [result?? null, null]
   }catch(error: Error | unknown){
-    console.log(error)
+    return [null, exception]
   }
 }
 
