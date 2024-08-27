@@ -9,7 +9,6 @@ import { send } from 'process';
 async function entryUpdate(req: Request, res: Response){
   res.set({ 'content-type': 'application/json; charset=utf-8' });
   console.log("Body: ", req.body)
-  
 
   const invalid_request = validateRequest(req)
   if(invalid_request) return sendApiError(res, invalid_request)
@@ -30,11 +29,10 @@ async function entryUpdate(req: Request, res: Response){
   })
   .then(async ([result, error])=>{
     if(error) return sendApiError(res, error)
-      console.log(result)
+    console.log(result)
     res.send(result)
   })
 }
-
 
 function validateRequest(req: Request): ApiError | null{
   var entryId = Number(req.params.entryId)

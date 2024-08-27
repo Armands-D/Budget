@@ -1,6 +1,6 @@
 
 import React, { Fragment, useState }from 'react';
-import {UserBudget} from '../../api_interfaces/MainApi'
+import {ApiError, UserBudget} from '../../api_interfaces/MainApi'
 import userEvent from '@testing-library/user-event';
 
 namespace IDs {
@@ -54,7 +54,7 @@ function EntryRow(props: {type: UserBudget.SectionType, entry: UserBudget.Entry}
     onBlur={ _ => {
       clearTimeout(entryDataUpdateTimer)
       if(entryUpdatedByTimer) return
-      console.log(entry_row_id, 'EntryRowOnBlur',entry)
+      console.log(entry_row_id, 'EntryRowOnBlur', entry)
       updateEntryDB(entry)
     }}
     id={entry_row_id}
@@ -114,22 +114,44 @@ function EntryRowData(props: {
   function startEntryUpdateTimer({
     name = entry.name,
     amount = entry.amount
+  }
+  :{
+    name?: UserBudget.Entry['name'],
+    amount?: UserBudget.Entry['amount']
   }){
-    setEntry({...entry, name, amount})
+    let new_entry: UserBudget.Entry = {name, amount, entryId: entry.entryId}
     clearTimeout(updateTimer)
     setUpdateStatus(false)
-    setUpdateTimer(
+    setUpdateTimer (
       setTimeout(() => {
-        console.log(IDs.entry_row_id(entry.entryId), 'EntryUpdateTimer', entry)
-        updateEntryDB(entry)
+        console.log(IDs.entry_row_id(entry.entryId), 'EntryUpdateTimer', new_entry)
+        updateEntryDB(new_entry).then(updated_entry =>{if(updated_entry)setEntry(updated_entry)})
         setUpdateStatus(true)
       }, 2000)
     )
   }
 }
 
-function updateEntryDB(entry: UserBudget.Entry){
+function updateEntryDB(entry: UserBudget.Entry): Promise<UserBudget.Entry | null>{
   console.log('Updating DB Entry', entry)
+  return fetch(`http://localhost:3001/entry/${entry.entryId}`,{
+    method: 'PUT',
+    credentials: "include",
+    body: JSON.stringify(entry),
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    }
+  })
+  .then(async (response: Response)=>{
+    if(!response.ok){
+      console.log('DB Entry update failed')
+      return null;
+    }
+    let updated_entry: UserBudget.Entry = await response.json()
+    console.log('Entry updated', updated_entry)
+    return updated_entry
+  })
 }
 
 export {CategoryEntries, IDs}
