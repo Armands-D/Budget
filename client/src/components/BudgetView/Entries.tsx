@@ -55,7 +55,7 @@ function EntryRow(props: {type: UserBudget.SectionType, entry: UserBudget.Entry}
       clearTimeout(entryDataUpdateTimer)
       if(entryUpdatedByTimer) return
       console.log(entry_row_id, 'EntryRowOnBlur', entry)
-      updateEntryDB(entry)
+      updateEntryAPI(entry)
     }}
     id={entry_row_id}
     className={'entry'}>
@@ -63,6 +63,8 @@ function EntryRow(props: {type: UserBudget.SectionType, entry: UserBudget.Entry}
     </tr>
   </>
 }
+
+////////////////////////////////////////////////
 
 function EntryRowData(props: {
   entryState: {
@@ -89,7 +91,10 @@ function EntryRowData(props: {
     >
       <input
       type='text'
-      onInput={(e) => {startEntryUpdateTimer({name: e.currentTarget.value})}}
+      onInput={(e)=>{
+        const name : string = e.currentTarget.value
+        startEntryUpdateTimer({name})
+      }}
       defaultValue={entry.name}
       id={IDs.entry_row_input_id('name', entry.entryId)}
       />
@@ -102,7 +107,10 @@ function EntryRowData(props: {
     >
       <input
       type='text'
-      onInput={(e) => {startEntryUpdateTimer({amount: Number(e.currentTarget.value)})}}
+      onInput={(e) => {
+        const amount: number = Number(e.currentTarget.value)
+        startEntryUpdateTimer({amount})
+      }}
       defaultValue={entry.amount}
       id={IDs.entry_row_input_id('amount', entry.entryId)}
       />
@@ -114,25 +122,25 @@ function EntryRowData(props: {
   function startEntryUpdateTimer({
     name = entry.name,
     amount = entry.amount
-  }
-  :{
+  }:{
     name?: UserBudget.Entry['name'],
     amount?: UserBudget.Entry['amount']
   }){
     let new_entry: UserBudget.Entry = {name, amount, entryId: entry.entryId}
+    setEntry(new_entry)
     clearTimeout(updateTimer)
     setUpdateStatus(false)
     setUpdateTimer (
       setTimeout(() => {
         console.log(IDs.entry_row_id(entry.entryId), 'EntryUpdateTimer', new_entry)
-        updateEntryDB(new_entry).then(updated_entry =>{if(updated_entry)setEntry(updated_entry)})
+        updateEntryAPI(new_entry)
         setUpdateStatus(true)
       }, 2000)
     )
   }
 }
 
-function updateEntryDB(entry: UserBudget.Entry): Promise<UserBudget.Entry | null>{
+function updateEntryAPI(entry: UserBudget.Entry): Promise<UserBudget.Entry | null>{
   console.log('Updating DB Entry', entry)
   return fetch(`http://localhost:3001/entry/${entry.entryId}`,{
     method: 'PUT',
