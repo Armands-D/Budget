@@ -36,4 +36,17 @@ SELECT * FROM refresh_tokens;
 SELECT * FROM session_tokens;
 SELECT * FROM user;
 
-CALL main_db.refresh_auth_token(1)
+UPDATE active_categories
+SET name = "Income Cat 1"
+WHERE id = 2;
+
+CALL main_db.refresh_auth_token(1);
+
+SELECT 
+	u.username AS userName,
+    u.email,
+    u.id AS userId,
+    rt.token
+FROM main_db.user AS u
+	LEFT JOIN main_db.refresh_tokens AS rt ON u.id = rt.user_id
+	WHERE u.id = 1;

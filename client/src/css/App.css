@@ -101,3 +101,7 @@ th{
 td{
   padding: 0.5%;
 }
+
+.toast {
+  background-color: #bd3e3e;
+}

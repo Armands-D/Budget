@@ -4,7 +4,7 @@ import './css/App.css';
 import {Login} from './components/Login'
 import { BudgetView } from './components/BudgetView/BudgetView';
 import { createContext, useContext } from 'react';
-import { TButton, Toast, ToastContext, ToastContextHandler } from './components/Toast/Toast';
+import { Toast, ToastContext, ToastContextHandler } from './components/Toast/Toast';
 
 // export const ToastContext = createContext<null | ToastContextHandler>(null)
 
@@ -23,7 +23,6 @@ function App() {
         {!loggedIn && <Login toggleLogin={toggleLogin}/>}
         {loggedIn && <><BudgetView/><button onClick={toggleLogin}>Logout</button></>}
         <Toast></Toast>
-        <TButton></TButton>
       </div>
     </ToastContext.Provider>
   );

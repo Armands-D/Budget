@@ -1,7 +1,8 @@
 
-import React, { Fragment, useState }from 'react';
+import React, { Fragment, useContext, useState }from 'react';
 import {ApiError, UserBudget} from '../../api_interfaces/MainApi'
 import userEvent from '@testing-library/user-event';
+import { ToastContext } from '../Toast/Toast';
 
 namespace IDs {
   export const entry_row_class = (type: UserBudget.Entry['name' | 'amount'])=>
@@ -84,6 +85,7 @@ function EntryRowData(props: {
   const {entry, setEntry} = props.entryState
   const {updateTimer, setUpdateTimer} = props.updateTimerState
   const {updateStatus, setUpdateStatus} = props.updateStatusState
+  const toast_context = useContext(ToastContext)
 
   let entry_name_field =<>
     <td
@@ -122,18 +124,21 @@ function EntryRowData(props: {
   function startEntryUpdateTimer({
     name = entry.name,
     amount = entry.amount
-  }:{
-    name?: UserBudget.Entry['name'],
-    amount?: UserBudget.Entry['amount']
-  }){
+  }
+  : Partial<UserBudget.Entry> 
+  ){
     let new_entry: UserBudget.Entry = {name, amount, entryId: entry.entryId}
     setEntry(new_entry)
     clearTimeout(updateTimer)
     setUpdateStatus(false)
     setUpdateTimer (
-      setTimeout(() => {
+      setTimeout(async () => {
         console.log(IDs.entry_row_id(entry.entryId), 'EntryUpdateTimer', new_entry)
-        updateEntryAPI(new_entry)
+        let updated_entry = await updateEntryAPI(new_entry)
+        if(!updated_entry){
+          toast_context?.popUp('Whoopsies')
+          console.log('popup')
+        }
         setUpdateStatus(true)
       }, 2000)
     )

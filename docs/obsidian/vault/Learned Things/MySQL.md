@@ -13,7 +13,7 @@ Installing MySQL on Linux Using the MySQL APT Repository
  ```
 sudo apt-get install \
 	mysql-server \
-	install mysql-workbench-community \
+	mysql-workbench-community \
 	libmysqlclient21
 ```
 
