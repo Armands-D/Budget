@@ -15,7 +15,7 @@ function Table (
 ) : JSX.Element
 {
   if(!budget) return <div></div>
-  let net : number = budget.income.total - budget.expenses.total
+  let net : number = UserBudget.subtract(budget.income.total, budget.expenses.total)
     
   return (
   <table
@@ -43,14 +43,9 @@ function Table (
   </table>) 
 }
 
-type section_data = {
-  categories: (UserBudget.Category)[]
-  total: number
-}
-
 const section_row_class = (type: string) => `section-row ${type}`
 const section_row_id = (type:string) => `section-row-${type}`
-function BuildSection(props: {type: UserBudget.SectionType, section_data: section_data}){
+function BuildSection(props: {type: UserBudget.SectionType, section_data: UserBudget.Section}){
   let section_heading = <tr
     id={section_row_id(props.type)}
     className={section_row_class(props.type)}>

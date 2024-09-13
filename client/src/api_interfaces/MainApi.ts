@@ -23,6 +23,14 @@ export namespace Database{
 
 export namespace UserBudget {
 
+  export function add(a: Entry['amount'], b: Entry['amount']){
+    return ((Number(a) * 100) + (Number(b) * 100) / 100)
+  }
+
+  export function subtract(a: Entry['amount'], b: Entry['amount']){
+    return ((Number(a) * 100) - (Number(b) * 100) / 100)
+  }
+
   export interface Reponse {
     budgetId: number
     [SectionType.income] : Section
@@ -33,20 +41,20 @@ export namespace UserBudget {
 
   export interface Section {
     categories: (Category)[]
-    total: number
+    total: string
   }
 
   export interface Category {
     name: string
     categoryId: number
     entries: Entry[]
-    total: number
+    total: string
   }
 
   export interface Entry {
     entryId: number
     name: string
-    amount: number
+    amount: string
   }
 
   export interface Results{
@@ -60,7 +68,7 @@ export namespace UserBudget {
         category: string
         entryId: number
         name: string
-        amount: number
+        amount: string
       }
   }
 }

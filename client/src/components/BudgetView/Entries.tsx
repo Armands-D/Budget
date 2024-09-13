@@ -1,7 +1,6 @@
 
 import React, { Fragment, useContext, useState }from 'react';
 import {ApiError, UserBudget} from '../../api_interfaces/MainApi'
-import userEvent from '@testing-library/user-event';
 import { ToastContext } from '../Toast/Toast';
 
 namespace IDs {
@@ -52,11 +51,14 @@ function EntryRow(props: {type: UserBudget.SectionType, entry: UserBudget.Entry}
 
   return <>
     <tr
-    onBlur={ _ => {
+    onBlur={ async _ => {
       clearTimeout(entryDataUpdateTimer)
       if(entryUpdatedByTimer) return
       console.log(entry_row_id, 'EntryRowOnBlur', entry)
-      updateEntryAPI(entry)
+      let updated_entry: UserBudget.Entry | null = await updateEntryAPI(entry)
+      if(!updated_entry){
+
+      }
     }}
     id={entry_row_id}
     className={'entry'}>
@@ -110,7 +112,7 @@ function EntryRowData(props: {
       <input
       type='text'
       onInput={(e) => {
-        const amount: number = Number(e.currentTarget.value)
+        const amount: string = e.currentTarget.value
         startEntryUpdateTimer({amount})
       }}
       defaultValue={entry.amount}
