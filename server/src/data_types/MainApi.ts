@@ -1,1 +1,1 @@
-/home/armands/Dev/Budget/client/src/api_interfaces/MainApi.ts
+/home/armands/Dev/Budget/client/src/data_types/MainApi.ts

@@ -1,6 +1,6 @@
 
 import React, { Fragment, useContext, useState }from 'react';
-import {ApiError, UserBudget} from '../../api_interfaces/MainApi'
+import {ApiError, UserBudget} from '../../data_types/MainApi'
 import userEvent from '@testing-library/user-event';
 import { ToastContext } from '../Toast/Toast';
 
@@ -15,7 +15,13 @@ namespace IDs {
     `entry-row-input-${type}-${id}`
 }
 
-function CategoryEntries(props: {type: UserBudget.SectionType, category: UserBudget.Category}){
+function CategoryEntries(props: {
+  type: UserBudget.SectionType,
+  category: UserBudget.Category,
+  categoryState : {
+    updateEntry: any
+  }
+}){
   let entry_rows = []
   let entries : UserBudget.Entry[] = props.category.entries
   for(let index : number = 0; index < entries.length; index++){
@@ -24,13 +30,22 @@ function CategoryEntries(props: {type: UserBudget.SectionType, category: UserBud
         <EntryRow
         type={props.type}
         entry={entries[index]}
+        categoryState={props.categoryState}
         />
       </Fragment>)
   }
   return <>{entry_rows}</>
 }
 
-function EntryRow(props: {type: UserBudget.SectionType, entry: UserBudget.Entry}){
+function EntryRow(props:
+  {
+    type: UserBudget.SectionType,
+    entry: UserBudget.Entry,
+    categoryState: {
+      updateEntry: any
+    }
+  }
+){
   const {type} = props
   const [entry, setEntry] = useState<UserBudget.Entry>(props.entry)
   const [entryDataUpdateTimer, setEntryUpdateTimer] = useState<NodeJS.Timeout>()
@@ -47,7 +62,8 @@ function EntryRow(props: {type: UserBudget.SectionType, entry: UserBudget.Entry}
     updateStatusState:{
       updateStatus: entryUpdatedByTimer,
       setUpdateStatus: setEntryUpdatedByTimer
-    }
+    },
+    categoryState: props.categoryState
   })
 
   return <>
@@ -56,7 +72,9 @@ function EntryRow(props: {type: UserBudget.SectionType, entry: UserBudget.Entry}
       clearTimeout(entryDataUpdateTimer)
       if(entryUpdatedByTimer) return
       console.log(entry_row_id, 'EntryRowOnBlur', entry)
-      updateEntryAPI(entry)
+      let new_entry = updateEntryAPI(entry)
+      if(!new_entry) return
+      props.categoryState.updateEntry(new_entry)
     }}
     id={entry_row_id}
     className={'entry'}>
@@ -79,6 +97,9 @@ function EntryRowData(props: {
   updateStatusState:{
     updateStatus: boolean,
     setUpdateStatus: (status: boolean)=>void
+  },
+  categoryState: {
+    updateEntry: any
   }
 }){
 
@@ -129,6 +150,7 @@ function EntryRowData(props: {
   ){
     let new_entry: UserBudget.Entry = {name, amount, entryId: entry.entryId}
     setEntry(new_entry)
+    props.categoryState.updateEntry(new_entry)
     clearTimeout(updateTimer)
     setUpdateStatus(false)
     setUpdateTimer (

@@ -1,9 +1,9 @@
 // React
-import React, {} from 'react';
+import React, { useState } from 'react';
 
 // Components
 import {Categories} from './Categories'
-import {UserBudget} from '../../api_interfaces/MainApi'
+import {UserBudget} from '../../data_types/MainApi'
 
 const budget_table_class = 'budget-table'
 const budget_table_id = 'budget-table'
@@ -11,9 +11,15 @@ const net_row_class = (type:string) => `net-row ${type}`
 const net_row_id = 'net-row'
 
 function Table (
-  {budget}: {budget:UserBudget.Reponse | null }
+  {budgetState}: {
+    budgetState: {
+      budget: UserBudget.Reponse | null,
+      setBudget: React.Dispatch<React.SetStateAction<UserBudget.Reponse | null>>
+    },
+   }
 ) : JSX.Element
 {
+  const {budget, setBudget} = budgetState
   if(!budget) return <div></div>
   let net : number = UserBudget.subtract(budget.income.total, budget.expenses.total)
     
@@ -41,6 +47,12 @@ function Table (
 
     </tbody>
   </table>) 
+
+  function updateSection(type: UserBudget.SectionType, section: UserBudget.Section){
+    if(!budget)return
+    let new_budget = {...budget, [UserBudget.SectionType[type]]: section}
+    setBudget(new_budget)
+  }
 }
 
 type section_data = {
@@ -50,7 +62,10 @@ type section_data = {
 
 const section_row_class = (type: string) => `section-row ${type}`
 const section_row_id = (type:string) => `section-row-${type}`
+
 function BuildSection(props: {type: UserBudget.SectionType, section_data: section_data}){
+  const [section, setSection] = useState({type: props.section_data})
+
   let section_heading = <tr
     id={section_row_id(props.type)}
     className={section_row_class(props.type)}>
@@ -65,8 +80,14 @@ function BuildSection(props: {type: UserBudget.SectionType, section_data: sectio
     <Categories
     type={props.type}
     categories={props.section_data.categories}
+    sectionState={{updateSection}}
     />
   </>
+
+  function updateSection(categories: UserBudget.Category[]){
+    props.section_data.categories = categories
+    setSection({type: props.section_data})
+  }
 }
 
 export {Table}

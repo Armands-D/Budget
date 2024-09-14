@@ -1,4 +1,4 @@
-import {ApiError} from "../api_interfaces/MainApi"
+import {ApiError} from "../data_types/MainApi"
 
 export const API_PORT: number = 3011;
 export const API_URL: string = `http://localhost:${API_PORT}`

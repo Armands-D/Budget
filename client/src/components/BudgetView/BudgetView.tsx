@@ -1,5 +1,5 @@
 import React from 'react';
-import {UserBudget} from '../../api_interfaces/MainApi'
+import {UserBudget} from '../../data_types/MainApi'
 import { Table } from './Table';
 
 function BudgetView(){
@@ -29,9 +29,12 @@ function BudgetView(){
   },[budgetUpdate])
 
   return <div id='budget'>
-      <Table budget={budget} />
+      <Table 
+        budgetState={{budget, setBudget}}
+      />
       <button id='clickbutton' onClick={()=>setBudgetUpdate(!budgetUpdate)}>CLICK</button>
     </div>
+  
 }
 
 export {BudgetView}

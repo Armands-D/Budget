@@ -1,5 +1,5 @@
 import {fetchAPI, isError} from "../functions/ApiRequests"
-import {ApiError} from "../api_interfaces/MainApi"
+import {ApiError} from "../data_types/MainApi"
 
 function Login({toggleLogin}: {toggleLogin: () => void}){
 
