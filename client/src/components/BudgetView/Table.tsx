@@ -15,7 +15,7 @@ function Table (
 ) : JSX.Element
 {
   if(!budget) return <div></div>
-  let net : number = budget.income.total - budget.expenses.total
+  let net : number = UserBudget.subtract(budget.income.total, budget.expenses.total)
     
   return (
   <table
@@ -35,7 +35,7 @@ function Table (
 
       <tr
       id={net_row_id}
-      className={net_row_class(net <= 0 ? 'expenses' : 'income')}>
+      className={net_row_class(net < 0 ? 'expenses' : 'income')}>
         <th>Net:</th><td>{net}</td>
       </tr>
 

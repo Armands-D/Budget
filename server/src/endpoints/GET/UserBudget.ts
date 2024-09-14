@@ -81,7 +81,7 @@ async function transformBudgetResults(
     if(!(category_id in unique_type_category)){
       unique_type_category[category_id] = new_category
     }
-    let entry: UserBudget.Entry = {entryId: row.entryId, name: row.name, amount: row.amount}
+    let entry: UserBudget.Entry = {entryId: row.entryId, name: row.name, amount: Number(row.amount)}
     let current_category : UserBudget.Category = unique_type_category[category_id]
 
     current_category.total += entry.amount

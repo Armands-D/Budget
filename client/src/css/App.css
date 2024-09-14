@@ -90,6 +90,10 @@ table {
   background-color: #55AA00;
 }
 
+.net-row.expenses{
+  background-color: #c4542c;
+}
+
 .budget-table{
   width: 50%;
 }

@@ -23,6 +23,26 @@ export namespace Database{
 
 export namespace UserBudget {
 
+  export function add(a:number, b:number, ...numbers: number[]): number{
+    let by100 = (n:number) => Number(n.toFixed(2)) * 100
+    let sum: number = by100(a) + by100(b)
+    let n: number;
+    for(n of numbers){
+      sum += by100(n)
+    }
+    return Number((sum / 100).toFixed(2))
+  }
+
+  export function subtract(a:number, b:number, ...numbers: number[]): number{
+    let by100 = (n:number) => Number(n.toFixed(2)) * 100
+    let sum: number = by100(a) - by100(b)
+    let n: number;
+    for(n of numbers){
+      sum -= by100(n)
+    }
+    return Number((sum / 100).toFixed(2))
+  }
+
   export interface Reponse {
     budgetId: number
     [SectionType.income] : Section
