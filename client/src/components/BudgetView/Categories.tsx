@@ -101,10 +101,11 @@ export class CategoryState{
   }
 
   updateEntry(entry: UserBudget.Entry){
+    console.log('CategoryState: updateEntry', entry)
     let entry_lookup = Object.fromEntries(this.category.entries.map(
       (entry, arr)=>[entry.entryId, entry]))
     
-    if(!(entry.entryId in entry_lookup)) return console.log(entry.entryId, 'not in', entry_lookup)
+    if(!(entry.entryId in entry_lookup)) return console.log('CategoryState: entryId not found', entry)
     entry_lookup[entry.entryId] = entry
     let new_entries = Object.values(entry_lookup)
     this.setCategory({

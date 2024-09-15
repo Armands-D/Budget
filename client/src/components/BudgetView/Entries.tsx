@@ -123,26 +123,13 @@ function EntryRowData(props: {
   : Partial<UserBudget.Entry> 
   ){
     let new_entry: UserBudget.Entry = {name, amount, entryId: state_handler.entry.entryId}
-    state_handler.setEntry(new_entry)
+    state_handler.startEntryUpdateTimer(new_entry)
     props.categoryState.updateEntry(new_entry)
-    clearTimeout(state_handler.entryUpdateTimer)
-    state_handler.setEntryUpdatedByTimer(false)
-    state_handler.setEntryUpdateTimer(
-      setTimeout(async () => {
-        console.log(IDs.entry_row_id(state_handler.entry.entryId), 'EntryUpdateTimer', new_entry)
-        let updated_entry = await updateEntryAPI(new_entry)
-        if(!updated_entry){
-          state_handler.toast_context?.popUp('Whoopsies')
-          console.log('popup')
-        }
-        state_handler.setEntryUpdatedByTimer(true)
-      }, 2000)
-    )
   }
 }
 
 function updateEntryAPI(entry: UserBudget.Entry): Promise<UserBudget.Entry | null>{
-  console.log('Updating DB Entry', entry)
+  console.log('Entry API update call:', entry)
   return fetch(`http://localhost:3001/entry/${entry.entryId}`,{
     method: 'PUT',
     credentials: "include",
@@ -154,11 +141,11 @@ function updateEntryAPI(entry: UserBudget.Entry): Promise<UserBudget.Entry | nul
   })
   .then(async (response: Response)=>{
     if(!response.ok){
-      console.log('DB Entry update failed')
+      console.log('Entry API update failed: ', entry)
       return null;
     }
     let updated_entry: UserBudget.Entry = await response.json()
-    console.log('Entry updated', updated_entry)
+    console.log('Entry API update success', updated_entry)
     return updated_entry
   })
 }
@@ -178,29 +165,21 @@ class EntryStateHandler{
     [this.entryUpdatedByTimer, this.setEntryUpdatedByTimer] = useState<boolean>(false);
   }
 
-  // startEntryUpdateTimer({
-  //   name = this.entry.name,
-  //   amount = this.entry.amount
-  // } : Partial<UserBudget.Entry> 
-  // ){
-  //   let new_entry: UserBudget.Entry = {name, amount, entryId: this.entry.entryId}
-  //   this.setEntry(new_entry)
-  //   props.categoryState.updateEntry(new_entry)
-  //   clearTimeout(this.entryUpdateTimer)
-  //   this.setEntryUpdatedByTimer(false)
-  //   this.setEntryUpdateTimer(
-  //     setTimeout(async () => {
-  //       console.log(IDs.entry_row_id(this.entry.entryId), 'EntryUpdateTimer', new_entry)
-  //       let updated_entry = await updateEntryAPI(new_entry)
-  //       if(!updated_entry){
-  //         this.toast_context?.popUp('Whoopsies')
-  //         console.log('popup')
-  //       }
-  //       this.setEntryUpdatedByTimer(true)
-  //     }, 2000)
-  //   )
-
-  // }
+  startEntryUpdateTimer(entry: UserBudget.Entry){
+    console.log('EntryState: startEntryUpdateTimer', entry)
+    this.setEntry(entry)
+    clearTimeout(this.entryUpdateTimer)
+    this.setEntryUpdatedByTimer(false)
+    this.setEntryUpdateTimer(
+      setTimeout(async () => {
+        let updated_entry = await updateEntryAPI(entry)
+        if(!updated_entry){
+          this.toast_context?.popUp('Whoopsies')
+        }
+        this.setEntryUpdatedByTimer(true)
+      }, 2000)
+    )
+  }
 }
 
 export {CategoryEntries, IDs}
