@@ -3,6 +3,7 @@ import React, { Fragment, useContext, useState }from 'react';
 import {ApiError, UserBudget} from '../../data_types/MainApi'
 import userEvent from '@testing-library/user-event';
 import { ToastContext } from '../Toast/Toast';
+import {CategoryState} from './Categories'
 
 namespace IDs {
   export const entry_row_class = (type: UserBudget.Entry['name' | 'amount'])=>
@@ -18,9 +19,7 @@ namespace IDs {
 function CategoryEntries(props: {
   type: UserBudget.SectionType,
   category: UserBudget.Category,
-  categoryState : {
-    updateEntry: any
-  }
+  categoryState : CategoryState
 }){
   let entry_rows = []
   let entries : UserBudget.Entry[] = props.category.entries
@@ -62,9 +61,10 @@ function EntryRow(props:
       clearTimeout(state_handler.entryUpdateTimer)
       if(state_handler.entryUpdatedByTimer) return
       console.log(entry_row_id, 'EntryRowOnBlur', state_handler.entry)
-      let new_entry = updateEntryAPI(state_handler.entry)
-      if(!new_entry) return
-      props.categoryState.updateEntry(new_entry)
+      updateEntryAPI(state_handler.entry).then((new_entry)=>{
+        if(!new_entry) return
+        props.categoryState.updateEntry(new_entry)
+      })
     }}
     id={entry_row_id}
     className={'entry'}>

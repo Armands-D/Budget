@@ -24,7 +24,8 @@ async function entryUpdate(req: Request, res: Response){
       )
     const json_results = JSON.parse(JSON.stringify(results[0]))
     console.log(json_results)
-    var updated_entry: UserBudget.Entry = json_results[0]
+    var json_result =  json_results[0]
+    var updated_entry: UserBudget.Entry = {entryId: json_result.id, name: json_result.name, amount:Number(json_result.amount)}
     return updated_entry
   })
   .then(async ([result, error])=>{

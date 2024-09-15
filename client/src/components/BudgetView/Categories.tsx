@@ -52,16 +52,11 @@ function Category(props: {
   }
 }){
   let {type, category} = props
-
-  let entry_lookup : Record<number, UserBudget.Entry> = Object.fromEntries(
-    category.entries.map((entry, _) => [entry.entryId, entry])
-  )
-
-  const [entries, setEntries] = useState(category.entries)
+  let state_handler = new CategoryState(category)
 
   let cat_heading =
     <tr
-    id={category_row_id(category.categoryId)}
+    id={category_row_id(state_handler.category.categoryId)}
     className={category_row_class(type)}>
       <th
       colSpan={2}>
@@ -71,15 +66,15 @@ function Category(props: {
 
   let cat_entries = <CategoryEntries
     type={type}
-    category={category}
-    categoryState={{updateEntry}}
+    category={state_handler.category}
+    categoryState={state_handler}
   />
 
   let cat_total = <tr
-    id={category_row_total_id(category.categoryId)}
+    id={category_row_total_id(state_handler.category.categoryId)}
     className={category_row_class(type)}>
       <th>Total</th>
-      <td>{category.total}</td>
+      <td>{state_handler.category.total}</td>
   </tr>
 
   return <>
@@ -87,12 +82,36 @@ function Category(props: {
     {cat_entries}
     {cat_total}
   </>
+}
 
-  function updateEntry(entry: UserBudget.Entry){
-    if(! Object.keys(entry_lookup).includes(String(entry.entryId)))return console.log('Entry Not Found')
+export class CategoriesState{
+  readonly categories: UserBudget.Category[]
+  setCategories: any
+
+  constructor(categories: UserBudget.Category[]){
+    [this.categories, this.setCategories] = useState(categories);
+  }
+}
+
+export class CategoryState{
+  readonly category: UserBudget.Category
+  setCategory: any
+  constructor(category: UserBudget.Category){
+    [this.category, this.setCategory] = useState(category);
+  }
+
+  updateEntry(entry: UserBudget.Entry){
+    let entry_lookup = Object.fromEntries(this.category.entries.map(
+      (entry, arr)=>[entry.entryId, entry]))
+    
+    if(!(entry.entryId in entry_lookup)) return console.log(entry.entryId, 'not in', entry_lookup)
     entry_lookup[entry.entryId] = entry
-    setEntries(Object.values(entry_lookup))
-    props.categoriesState.updateCategory({...category, entries})
+    let new_entries = Object.values(entry_lookup)
+    this.setCategory({
+      ...this.category,
+      entries: new_entries,
+      total: new_entries.reduce((sum, entry)=> sum + entry.amount, 0)
+    })
   }
 }
 
