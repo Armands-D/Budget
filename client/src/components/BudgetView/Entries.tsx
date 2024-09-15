@@ -47,32 +47,22 @@ function EntryRow(props:
   }
 ){
   const {type} = props
-  const [entry, setEntry] = useState<UserBudget.Entry>(props.entry)
-  const [entryDataUpdateTimer, setEntryUpdateTimer] = useState<NodeJS.Timeout>()
-  const [entryUpdatedByTimer, setEntryUpdatedByTimer] = useState<boolean>(false)
-  const entry_row_id = IDs.entry_row_id(entry.entryId)
+  const state_handler = new EntryStateHandler(props.entry)
+  const entry_row_id = IDs.entry_row_id(state_handler.entry.entryId)
 
 
   let entry_row_data = EntryRowData({
-    entryState : {entry, setEntry},
-    updateTimerState: {
-      updateTimer: entryDataUpdateTimer,
-      setUpdateTimer: setEntryUpdateTimer
-    },
-    updateStatusState:{
-      updateStatus: entryUpdatedByTimer,
-      setUpdateStatus: setEntryUpdatedByTimer
-    },
+    entryStateHandler: state_handler,
     categoryState: props.categoryState
   })
 
   return <>
     <tr
     onBlur={ _ => {
-      clearTimeout(entryDataUpdateTimer)
-      if(entryUpdatedByTimer) return
-      console.log(entry_row_id, 'EntryRowOnBlur', entry)
-      let new_entry = updateEntryAPI(entry)
+      clearTimeout(state_handler.entryUpdateTimer)
+      if(state_handler.entryUpdatedByTimer) return
+      console.log(entry_row_id, 'EntryRowOnBlur', state_handler.entry)
+      let new_entry = updateEntryAPI(state_handler.entry)
       if(!new_entry) return
       props.categoryState.updateEntry(new_entry)
     }}
@@ -86,31 +76,16 @@ function EntryRow(props:
 ////////////////////////////////////////////////
 
 function EntryRowData(props: {
-  entryState: {
-    entry: UserBudget.Entry,
-    setEntry: (entry: UserBudget.Entry)=>void
-  },
-  updateTimerState : {
-    updateTimer: NodeJS.Timeout | undefined,
-    setUpdateTimer: (timer: NodeJS.Timeout | undefined)=>void
-  }
-  updateStatusState:{
-    updateStatus: boolean,
-    setUpdateStatus: (status: boolean)=>void
-  },
+  entryStateHandler: EntryStateHandler,
   categoryState: {
     updateEntry: any
   }
 }){
-
-  const {entry, setEntry} = props.entryState
-  const {updateTimer, setUpdateTimer} = props.updateTimerState
-  const {updateStatus, setUpdateStatus} = props.updateStatusState
-  const toast_context = useContext(ToastContext)
+  const state_handler = props.entryStateHandler
 
   let entry_name_field =<>
     <td
-    id={IDs.entry_row_data_id('name', entry.entryId)}
+    id={IDs.entry_row_data_id('name', state_handler.entry.entryId)}
     >
       <input
       type='text'
@@ -118,15 +93,14 @@ function EntryRowData(props: {
         const name : string = e.currentTarget.value
         startEntryUpdateTimer({name})
       }}
-      defaultValue={entry.name}
-      id={IDs.entry_row_input_id('name', entry.entryId)}
+      defaultValue={state_handler.entry.name}
+      id={IDs.entry_row_input_id('name', state_handler.entry.entryId)}
       />
     </td>
   </>
-
   let entry_amount_field = <>
     <td
-    id={IDs.entry_row_data_id('amount', entry.entryId)}
+    id={IDs.entry_row_data_id('amount', state_handler.entry.entryId)}
     >
       <input
       type='text'
@@ -134,8 +108,8 @@ function EntryRowData(props: {
         const amount: number = Number(e.currentTarget.value)
         startEntryUpdateTimer({amount})
       }}
-      defaultValue={entry.amount}
-      id={IDs.entry_row_input_id('amount', entry.entryId)}
+      defaultValue={state_handler.entry.amount}
+      id={IDs.entry_row_input_id('amount', state_handler.entry.entryId)}
       />
     </td>
   </>
@@ -143,25 +117,25 @@ function EntryRowData(props: {
   return <>{entry_name_field}{entry_amount_field}</>
 
   function startEntryUpdateTimer({
-    name = entry.name,
-    amount = entry.amount
+    name = state_handler.entry.name,
+    amount = state_handler.entry.amount
   }
   : Partial<UserBudget.Entry> 
   ){
-    let new_entry: UserBudget.Entry = {name, amount, entryId: entry.entryId}
-    setEntry(new_entry)
+    let new_entry: UserBudget.Entry = {name, amount, entryId: state_handler.entry.entryId}
+    state_handler.setEntry(new_entry)
     props.categoryState.updateEntry(new_entry)
-    clearTimeout(updateTimer)
-    setUpdateStatus(false)
-    setUpdateTimer (
+    clearTimeout(state_handler.entryUpdateTimer)
+    state_handler.setEntryUpdatedByTimer(false)
+    state_handler.setEntryUpdateTimer(
       setTimeout(async () => {
-        console.log(IDs.entry_row_id(entry.entryId), 'EntryUpdateTimer', new_entry)
+        console.log(IDs.entry_row_id(state_handler.entry.entryId), 'EntryUpdateTimer', new_entry)
         let updated_entry = await updateEntryAPI(new_entry)
         if(!updated_entry){
-          toast_context?.popUp('Whoopsies')
+          state_handler.toast_context?.popUp('Whoopsies')
           console.log('popup')
         }
-        setUpdateStatus(true)
+        state_handler.setEntryUpdatedByTimer(true)
       }, 2000)
     )
   }
@@ -187,6 +161,46 @@ function updateEntryAPI(entry: UserBudget.Entry): Promise<UserBudget.Entry | nul
     console.log('Entry updated', updated_entry)
     return updated_entry
   })
+}
+
+class EntryStateHandler{
+  readonly entry: UserBudget.Entry
+  setEntry: React.Dispatch<React.SetStateAction<UserBudget.Entry>>
+  readonly entryUpdateTimer: NodeJS.Timeout | undefined
+  setEntryUpdateTimer:  React.Dispatch<React.SetStateAction<NodeJS.Timeout | undefined>>
+  readonly entryUpdatedByTimer: boolean
+  setEntryUpdatedByTimer:  React.Dispatch<React.SetStateAction<boolean>>
+  toast_context = useContext(ToastContext)
+
+  constructor(entry: UserBudget.Entry){
+    [this.entry, this.setEntry] = useState(entry);
+    [this.entryUpdateTimer, this.setEntryUpdateTimer] = useState<NodeJS.Timeout>();
+    [this.entryUpdatedByTimer, this.setEntryUpdatedByTimer] = useState<boolean>(false);
+  }
+
+  // startEntryUpdateTimer({
+  //   name = this.entry.name,
+  //   amount = this.entry.amount
+  // } : Partial<UserBudget.Entry> 
+  // ){
+  //   let new_entry: UserBudget.Entry = {name, amount, entryId: this.entry.entryId}
+  //   this.setEntry(new_entry)
+  //   props.categoryState.updateEntry(new_entry)
+  //   clearTimeout(this.entryUpdateTimer)
+  //   this.setEntryUpdatedByTimer(false)
+  //   this.setEntryUpdateTimer(
+  //     setTimeout(async () => {
+  //       console.log(IDs.entry_row_id(this.entry.entryId), 'EntryUpdateTimer', new_entry)
+  //       let updated_entry = await updateEntryAPI(new_entry)
+  //       if(!updated_entry){
+  //         this.toast_context?.popUp('Whoopsies')
+  //         console.log('popup')
+  //       }
+  //       this.setEntryUpdatedByTimer(true)
+  //     }, 2000)
+  //   )
+
+  // }
 }
 
 export {CategoryEntries, IDs}
