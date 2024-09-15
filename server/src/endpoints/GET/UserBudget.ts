@@ -70,7 +70,7 @@ async function transformBudgetResults(
     let new_category : UserBudget.Category = {
       categoryId: category_id,
       name: row.category,
-      total: 0,
+      total: '',
       entries: []
     }
     
@@ -86,18 +86,18 @@ async function transformBudgetResults(
 
     current_category.total += entry.amount
     current_category.entries.push(entry)
-    row.type === "EXPENSE" ? expense_total += entry.amount : income_total += entry.amount
+    row.type === "EXPENSE" ? expense_total += Number(entry.amount) : income_total += Number(entry.amount)
   }
 
   return {
     budgetId: budgetId,
     income: {
       categories: Object.values(unique_income_categories),
-      total: income_total
+      total: String(income_total)
     },
     expenses: {
       categories: Object.values(unique_expense_categories),
-      total: expense_total
+      total: String(expense_total)
     }
   }
 }

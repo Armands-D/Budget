@@ -53,20 +53,20 @@ export namespace UserBudget {
 
   export interface Section {
     categories: (Category)[]
-    total: number
+    total: number 
   }
 
   export interface Category {
     name: string
     categoryId: number
     entries: Entry[]
-    total: number
+    total: number 
   }
 
   export interface Entry {
     entryId: number
     name: string
-    amount: number
+    amount:number 
   }
 
   export interface Results{

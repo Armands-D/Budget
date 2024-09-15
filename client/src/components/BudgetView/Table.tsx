@@ -55,15 +55,10 @@ function Table (
   }
 }
 
-type section_data = {
-  categories: (UserBudget.Category)[]
-  total: number
-}
-
 const section_row_class = (type: string) => `section-row ${type}`
 const section_row_id = (type:string) => `section-row-${type}`
 
-function BuildSection(props: {type: UserBudget.SectionType, section_data: section_data}){
+function BuildSection(props: {type: UserBudget.SectionType, section_data: UserBudget.Section}){
   const [section, setSection] = useState({type: props.section_data})
 
   let section_heading = <tr
