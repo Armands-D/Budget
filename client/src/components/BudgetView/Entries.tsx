@@ -58,13 +58,8 @@ function EntryRow(props:
   return <>
     <tr
     onBlur={ _ => {
-      clearTimeout(state_handler.entryUpdateTimer)
-      if(state_handler.entryUpdatedByTimer) return
-      console.log(entry_row_id, 'EntryRowOnBlur', state_handler.entry)
-      updateEntryAPI(state_handler.entry).then((new_entry)=>{
-        if(!new_entry) return
-        props.categoryState.updateEntry(new_entry)
-      })
+      state_handler.updateEntryImmediate()
+      props.categoryState.updateEntry(state_handler.entry)
     }}
     id={entry_row_id}
     className={'entry'}>
@@ -91,7 +86,7 @@ function EntryRowData(props: {
       type='text'
       onInput={(e)=>{
         const name : string = e.currentTarget.value
-        startEntryUpdateTimer({name})
+        updateEntry({name})
       }}
       defaultValue={state_handler.entry.name}
       id={IDs.entry_row_input_id('name', state_handler.entry.entryId)}
@@ -106,7 +101,7 @@ function EntryRowData(props: {
       type='text'
       onInput={(e) => {
         const amount: number = Number(e.currentTarget.value)
-        startEntryUpdateTimer({amount})
+        updateEntry({amount})
       }}
       defaultValue={state_handler.entry.amount}
       id={IDs.entry_row_input_id('amount', state_handler.entry.entryId)}
@@ -116,39 +111,19 @@ function EntryRowData(props: {
 
   return <>{entry_name_field}{entry_amount_field}</>
 
-  function startEntryUpdateTimer({
+  function updateEntry({
     name = state_handler.entry.name,
     amount = state_handler.entry.amount
   }
   : Partial<UserBudget.Entry> 
   ){
     let new_entry: UserBudget.Entry = {name, amount, entryId: state_handler.entry.entryId}
-    state_handler.startEntryUpdateTimer(new_entry)
+    state_handler.setEntry(new_entry)
+    state_handler.startEntryApiUpdateTimer(new_entry)
     props.categoryState.updateEntry(new_entry)
   }
 }
 
-function updateEntryAPI(entry: UserBudget.Entry): Promise<UserBudget.Entry | null>{
-  console.log('Entry API update call:', entry)
-  return fetch(`http://localhost:3001/entry/${entry.entryId}`,{
-    method: 'PUT',
-    credentials: "include",
-    body: JSON.stringify(entry),
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json",
-    }
-  })
-  .then(async (response: Response)=>{
-    if(!response.ok){
-      console.log('Entry API update failed: ', entry)
-      return null;
-    }
-    let updated_entry: UserBudget.Entry = await response.json()
-    console.log('Entry API update success', updated_entry)
-    return updated_entry
-  })
-}
 
 class EntryStateHandler{
   readonly entry: UserBudget.Entry
@@ -165,20 +140,49 @@ class EntryStateHandler{
     [this.entryUpdatedByTimer, this.setEntryUpdatedByTimer] = useState<boolean>(false);
   }
 
-  startEntryUpdateTimer(entry: UserBudget.Entry){
+  startEntryApiUpdateTimer(entry: UserBudget.Entry){
     console.log('EntryState: startEntryUpdateTimer', entry)
-    this.setEntry(entry)
     clearTimeout(this.entryUpdateTimer)
     this.setEntryUpdatedByTimer(false)
     this.setEntryUpdateTimer(
       setTimeout(async () => {
-        let updated_entry = await updateEntryAPI(entry)
+        let updated_entry = await this.sendEntryApiUpdate()
         if(!updated_entry){
           this.toast_context?.popUp('Whoopsies')
         }
         this.setEntryUpdatedByTimer(true)
       }, 2000)
     )
+  }
+
+  updateEntryImmediate(){
+    clearTimeout(this.entryUpdateTimer)
+    if(this.entryUpdatedByTimer) return // Avoid double update if timer alread updated
+    this.sendEntryApiUpdate().then((new_entry)=>{
+      if(!new_entry) return this.toast_context?.popUp("Whoopsies")
+    })
+  }
+
+  sendEntryApiUpdate(): Promise<UserBudget.Entry | null>{
+    console.log('Entry API update call:', this.entry)
+    return fetch(`http://localhost:3001/entry/${this.entry.entryId}`,{
+      method: 'PUT',
+      credentials: "include",
+      body: JSON.stringify(this.entry),
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      }
+    })
+    .then(async (response: Response)=>{
+      if(!response.ok){
+        console.log('Entry API update failed: ', this.entry)
+        return null;
+      }
+      let updated_entry: UserBudget.Entry = await response.json()
+      console.log('Entry API update success', updated_entry)
+      return updated_entry
+    })
   }
 }
 
