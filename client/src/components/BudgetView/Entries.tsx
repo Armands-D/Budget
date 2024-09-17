@@ -4,6 +4,7 @@ import {ApiError, UserBudget} from '../../data_types/MainApi'
 import userEvent from '@testing-library/user-event';
 import { ToastContext } from '../Toast/Toast';
 import {CategoryState} from './Categories'
+import { fetchAPI, Result } from '../../functions/ApiRequests';
 
 namespace IDs {
   export const entry_row_class = (type: UserBudget.Entry['name' | 'amount'])=>
@@ -40,9 +41,7 @@ function EntryRow(props:
   {
     type: UserBudget.SectionType,
     entry: UserBudget.Entry,
-    categoryState: {
-      updateEntry: any
-    }
+    categoryState: CategoryState
   }
 ){
   const {type} = props
@@ -58,7 +57,7 @@ function EntryRow(props:
   return <>
     <tr
     onBlur={ _ => {
-      state_handler.updateEntryImmediate()
+      state_handler.updateEntryImmediate(state_handler.entry)
       props.categoryState.updateEntry(state_handler.entry)
     }}
     id={entry_row_id}
@@ -68,13 +67,9 @@ function EntryRow(props:
   </>
 }
 
-////////////////////////////////////////////////
-
 function EntryRowData(props: {
   entryStateHandler: EntryStateHandler,
-  categoryState: {
-    updateEntry: any
-  }
+  categoryState: CategoryState
 }){
   const state_handler = props.entryStateHandler
 
@@ -118,12 +113,10 @@ function EntryRowData(props: {
   : Partial<UserBudget.Entry> 
   ){
     let new_entry: UserBudget.Entry = {name, amount, entryId: state_handler.entry.entryId}
-    state_handler.setEntry(new_entry)
-    state_handler.startEntryApiUpdateTimer(new_entry)
     props.categoryState.updateEntry(new_entry)
+    state_handler.startEntryApiUpdateTimer(new_entry)
   }
 }
-
 
 class EntryStateHandler{
   readonly entry: UserBudget.Entry
@@ -141,31 +134,31 @@ class EntryStateHandler{
   }
 
   startEntryApiUpdateTimer(entry: UserBudget.Entry){
-    console.log('EntryState: startEntryUpdateTimer', entry)
+    this.setEntry(entry)
+    console.log('EntryState: startEntryUpdateTimer', this.entry)
     clearTimeout(this.entryUpdateTimer)
     this.setEntryUpdatedByTimer(false)
     this.setEntryUpdateTimer(
       setTimeout(async () => {
-        let updated_entry = await this.sendEntryApiUpdate()
-        if(!updated_entry){
-          this.toast_context?.popUp('Whoopsies')
-        }
+        let result = await this.sendEntryApiUpdate()
+        if(!result.ok) this.toast_context?.popUp('Whoopsies')
         this.setEntryUpdatedByTimer(true)
       }, 2000)
     )
   }
 
-  updateEntryImmediate(){
+  updateEntryImmediate(entry: UserBudget.Entry){
+    this.setEntry(entry)
     clearTimeout(this.entryUpdateTimer)
     if(this.entryUpdatedByTimer) return // Avoid double update if timer alread updated
-    this.sendEntryApiUpdate().then((new_entry)=>{
-      if(!new_entry) return this.toast_context?.popUp("Whoopsies")
+    this.sendEntryApiUpdate().then((result)=>{
+      if(!result.ok) return this.toast_context?.popUp("Whoopsies")
     })
   }
 
-  sendEntryApiUpdate(): Promise<UserBudget.Entry | null>{
+  sendEntryApiUpdate(): Promise<Result<UserBudget.Entry, ApiError>>{
     console.log('Entry API update call:', this.entry)
-    return fetch(`http://localhost:3001/entry/${this.entry.entryId}`,{
+    return fetchAPI(`http://localhost:3001/entry/${this.entry.entryId}`,{
       method: 'PUT',
       credentials: "include",
       body: JSON.stringify(this.entry),
@@ -174,14 +167,11 @@ class EntryStateHandler{
         "Accept": "application/json",
       }
     })
-    .then(async (response: Response)=>{
-      if(!response.ok){
-        console.log('Entry API update failed: ', this.entry)
-        return null;
-      }
-      let updated_entry: UserBudget.Entry = await response.json()
-      console.log('Entry API update success', updated_entry)
-      return updated_entry
+    .then((result: Result<UserBudget.Entry, ApiError>)=>{
+      !result.ok ? 
+        console.log('Entry API update failed: ', this.entry) :
+        console.log('Entry API update success', )
+      return result
     })
   }
 }
